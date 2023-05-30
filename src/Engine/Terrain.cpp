@@ -14,6 +14,22 @@ namespace Engine
 		
 		m_playerX = 0;
 		m_playerZ = 0;
+
+		GenerateChunks();
+	}
+
+	void Terrain::GenerateChunks() noexcept
+	{
+		for (unsigned int x = 0; x <= m_width; x += m_width)
+		{
+			for (unsigned int z = 0; z <= m_height; z += m_height)
+			{
+				std::pair<unsigned int, unsigned int> chunkKey = std::make_pair(x, z);
+				unsigned int xPos = x;
+				unsigned int zPos = z;
+				m_chunks[chunkKey] = std::make_unique<Chunk>(xPos, zPos, m_width, m_height);
+			}
+		}
 	}
 
 	void Terrain::UpdateChunks() noexcept
@@ -107,8 +123,8 @@ namespace Engine
 			std::cout << chunk->VAO() << std::endl;
 
 			// World transformation
-			//glm::mat4 model = glm::translate(glm::mat4(1.0f), chunk->Position());
-			//terrainShader.SetUniform<glm::mat4>("u_model", model);
+			glm::mat4 model = glm::translate(glm::mat4(1.0f), chunk->Position());
+			terrainShader.SetUniform<glm::mat4>("u_model", model);
 
 			glDrawElements(GL_TRIANGLES, chunk->Indices().size(), GL_UNSIGNED_INT, 0);
 

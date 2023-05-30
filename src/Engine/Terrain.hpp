@@ -18,6 +18,7 @@ namespace Engine
 		~Terrain() = default;
 		Terrain(unsigned int width, unsigned int height) noexcept;
 
+		void GenerateChunks() noexcept;
 		void UpdateChunks() noexcept;
 		void UpdatePlayerPosition(float const& x, float const& z) noexcept;
 
