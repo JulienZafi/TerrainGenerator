@@ -18,16 +18,14 @@ namespace Application
 	class Application
 	{
 	public:
-		Application() = delete;
+		Application() noexcept;
 		~Application() = default;
-		Application(unsigned int const width, unsigned int const height) noexcept;
 
-		void Render(unsigned int const width, unsigned int const height, glm::mat4 const& viewMatrix, float const& cameraZoom) const noexcept;
+		void Render(glm::mat4 const& viewMatrix, float const& cameraZoom) const noexcept;
 
 		void UpdateCameraPos(std::unique_ptr <Engine::Window>& window) noexcept;
 
 	private:
-		unsigned int m_width, m_height;
 		std::unique_ptr <Engine::Terrain> m_terrain;
 
 		Engine::Shader m_terrainShader;

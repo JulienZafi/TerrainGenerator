@@ -9,11 +9,9 @@
 
 namespace Application
 {
-	Application::Application(unsigned int const width, unsigned int const height) noexcept
+	Application::Application() noexcept
 	{
-		m_width = width;
-		m_height = height;
-		m_terrain = std::make_unique <Engine::Terrain>(m_width, m_height);
+		m_terrain = std::make_unique <Engine::Terrain>();
 
 		/*
 		* CREATE GPU PROGRAM
@@ -21,7 +19,7 @@ namespace Application
 		m_terrainShader = Engine::Shader(TERRAIN_VSHADER_PATH, TERRAIN_FSHADER_PATH);
 	}
 
-	void Application::Render(unsigned int const width, unsigned int const height, glm::mat4 const& viewMatrix, float const& cameraZoom) const noexcept
+	void Application::Render(glm::mat4 const& viewMatrix, float const& cameraZoom) const noexcept
 	{
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -31,7 +29,7 @@ namespace Application
 		/*
 		* view / projection transformations
 		*/
-		glm::mat4 projection = glm::perspective(glm::radians(cameraZoom), (float)width / (float)height, 0.1f, 100000.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(cameraZoom), (float)m_terrain->Width() / (float)m_terrain->Height(), 0.1f, 100000.0f);
 		glm::mat4 view = viewMatrix;
 		m_terrainShader.SetUniform<glm::mat4>("u_projection", projection);
 		m_terrainShader.SetUniform<glm::mat4>("u_view", view);

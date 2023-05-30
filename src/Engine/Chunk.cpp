@@ -3,9 +3,11 @@
 #include <glad/glad.h>
 #include <noise/noise.h>
 
+#include <iostream>
+
 namespace Engine
 {
-    Chunk::Chunk(unsigned int const xPos, unsigned int const zPos, unsigned int const width, unsigned int const height) noexcept
+    Chunk::Chunk(int const xPos, int const zPos, int const width, int const height) noexcept
     {
         m_position = glm::vec3(xPos, 0.0f, zPos);
         m_width = width;
@@ -100,7 +102,7 @@ namespace Engine
     const float Chunk::GetHeightAtPos(float const& x, float const& z) const noexcept
     {
         float height{ 0.0f };
-        float playerHeight{ 1.7f };
+        float playerHeight{ 2.7f };
 
         // Get vertices index around (x,y) position
         int x0{ static_cast<int>(floor(abs(x))) };
