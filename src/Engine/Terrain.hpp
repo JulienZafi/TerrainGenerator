@@ -16,10 +16,9 @@ namespace Engine
 	class Terrain
 	{
 	public:
-		Terrain() noexcept;
+		Terrain() = default;
 		~Terrain() = default;
 
-		void GenerateChunks() noexcept;
 		void UpdateChunks() noexcept;
 		void UpdatePlayerPosition(float const& x, float const& z) noexcept;
 

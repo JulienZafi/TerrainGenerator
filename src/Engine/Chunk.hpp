@@ -9,7 +9,7 @@ namespace Engine
     {
     public:
         Chunk() = delete;
-        Chunk(int const xPos, int const zPos, int const width, int const height) noexcept;
+        Chunk(unsigned int const xPos, unsigned int const zPos, unsigned int const width, unsigned int const height) noexcept;
         ~Chunk();
 
         void Generate() noexcept;
@@ -25,7 +25,7 @@ namespace Engine
 
     private:
         glm::vec3 m_position;
-        int m_width;
+        unsigned int m_width;
         int m_height;
         std::vector<float> m_vertices;
         std::vector<unsigned int> m_indices;

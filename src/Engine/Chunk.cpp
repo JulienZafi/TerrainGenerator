@@ -7,7 +7,7 @@
 
 namespace Engine
 {
-    Chunk::Chunk(int const xPos, int const zPos, int const width, int const height) noexcept
+    Chunk::Chunk(unsigned int const xPos, unsigned int const zPos, unsigned int const width, unsigned int const height) noexcept
     {
         m_position = glm::vec3(xPos, 0.0f, zPos);
         m_width = width;
@@ -57,9 +57,9 @@ namespace Engine
             }
         }
 
-        for (unsigned int i{ 0 }; i < m_height - 1; i++)
+        for (unsigned int i{ 0 }; i < m_height; i++)
         {
-            for (unsigned int j{ 0 }; j < m_width - 1; j++)
+            for (unsigned int j{ 0 }; j < m_width; j++)
             {
                 unsigned int topLeft{ i * m_width + j };
                 unsigned int topRight{ topLeft + 1 };
