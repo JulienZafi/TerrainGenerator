@@ -26,7 +26,7 @@ int main()
 	/*
 	* RENDER LOOP
 	*/
-	std::unique_ptr <Application::Application> app{ std::make_unique<Application::Application>() };
+	std::unique_ptr <Application::Application> app{ std::make_unique<Application::Application>(MAP_CENTER) };
 	while (!window->ShouldClose())
 	{
 		window->UpdateTime();
@@ -34,8 +34,7 @@ int main()
 
 		// --------------------
 
-		app->UpdateCameraPos(window);
-		app->Render(window->ViewMatrix(), window->Zoom());
+		app->Render(window);
 
 		// --------------------
 

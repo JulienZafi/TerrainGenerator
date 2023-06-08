@@ -9,7 +9,9 @@
       "installRoot": "${projectDir}\\build\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "cmakeExecutable": "C:/Program Files/CMake/bin/cmake.exe",
+      "intelliSenseMode": "windows-msvc-x64"
     }
   ]
 }

@@ -18,10 +18,10 @@ namespace Application
 	class Application
 	{
 	public:
-		Application() noexcept;
+		Application(glm::vec3 const &mapCenter) noexcept;
 		~Application() = default;
 
-		void Render(glm::mat4 const& viewMatrix, float const& cameraZoom) const noexcept;
+		void Render(std::unique_ptr <Engine::Window>& window) noexcept;
 
 		void UpdateCameraPos(std::unique_ptr <Engine::Window>& window) noexcept;
 
