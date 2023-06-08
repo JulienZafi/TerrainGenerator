@@ -8,13 +8,12 @@ namespace Engine
     class Chunk
     {
     public:
-        Chunk() = delete;
-        Chunk(unsigned int const xPos, unsigned int const zPos, unsigned int const width, unsigned int const height) noexcept;
+        Chunk() = default;
+        Chunk(float const &xPos, float const &zPos, unsigned int const width, unsigned int const height) noexcept;
         ~Chunk();
 
         void Generate() noexcept;
         void SetupMesh() noexcept;
-
 
         const float GetHeightAtPos(float const& x, float const& z) const noexcept;
 
@@ -26,7 +25,7 @@ namespace Engine
     private:
         glm::vec3 m_position;
         unsigned int m_width;
-        int m_height;
+        unsigned int m_height;
         std::vector<float> m_vertices;
         std::vector<unsigned int> m_indices;
         unsigned int m_VAO, m_VBO, m_EBO;

@@ -18,8 +18,8 @@ namespace Engine
 		*/
 		for (auto it{ std::begin(m_chunks) }; it != std::end(m_chunks);)
 		{
-			float dx{ abs(abs(it->first.first) - abs(currentChunkX)) };
-			float dz{ abs(abs(it->first.second) - abs(currentChunkZ)) };
+			float dx{ abs(it->first.first - currentChunkX) };
+			float dz{ abs(it->first.second - currentChunkZ) };
 
 			if (dx > NUM_CHUNCKS_TO_DISPLAY || dz > NUM_CHUNCKS_TO_DISPLAY)
 			{
@@ -34,9 +34,9 @@ namespace Engine
 		/*
 		* Load chunks inside visualization distance
 		*/
-		for (int x{ (int)currentChunkX - NUM_CHUNCKS_TO_DISPLAY }; x <= (int)currentChunkX + NUM_CHUNCKS_TO_DISPLAY; ++x)
+		for (int x{ (int)currentChunkX - NUM_CHUNCKS_TO_DISPLAY }; x < (int)currentChunkX + NUM_CHUNCKS_TO_DISPLAY; ++x)
 		{
-			for (int z{ (int)currentChunkZ - NUM_CHUNCKS_TO_DISPLAY }; z <= (int)currentChunkZ + NUM_CHUNCKS_TO_DISPLAY; ++z)
+			for (int z{ (int)currentChunkZ - NUM_CHUNCKS_TO_DISPLAY }; z < (int)currentChunkZ + NUM_CHUNCKS_TO_DISPLAY; ++z)
 			{
 				auto chunkKey{ std::make_pair(x, z) };
 
@@ -44,7 +44,7 @@ namespace Engine
 				{
 					float xPos{ (float)x * (float)CHUNK_WIDTH };
 					float zPos{ (float)z * (float)CHUNK_HEIGHT };
-					m_chunks[chunkKey] = std::make_unique<Chunk>((int)xPos, (int)zPos, CHUNK_WIDTH, CHUNK_HEIGHT);
+					m_chunks[chunkKey] = std::make_unique<Chunk>(xPos, zPos, CHUNK_WIDTH, CHUNK_HEIGHT);
 				}
 				else{}
 			}
