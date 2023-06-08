@@ -12,8 +12,8 @@
 
 namespace Application
 {
-	constexpr std::string_view const TERRAIN_VSHADER_PATH{ "../../shaders/terrain/terrain.vs" };
-	constexpr std::string_view const TERRAIN_FSHADER_PATH{ "../../shaders/terrain/terrain.fs" };
+	constexpr std::string_view const TERRAIN_VSHADER_PATH{ "../../../shaders/terrain/terrain.vs" };
+	constexpr std::string_view const TERRAIN_FSHADER_PATH{ "../../../shaders/terrain/terrain.fs" };
 
 	class Application
 	{
