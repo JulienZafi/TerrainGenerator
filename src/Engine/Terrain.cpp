@@ -10,16 +10,16 @@ namespace Engine
 		/*
 		* Current chunk coordinates
 		*/
-		float currentChunkX{ m_playerX / (float)CHUNK_WIDTH };
-		float currentChunkZ{ m_playerZ / (float)CHUNK_HEIGHT };
+		int currentChunkX{ (int)round(m_playerX / CHUNK_WIDTH) };
+		int currentChunkZ{ (int)round(m_playerZ / CHUNK_HEIGHT)};
 
 		/*
 		* Delete chunks outside visualization distance
 		*/
 		for (auto it{ std::begin(m_chunks) }; it != std::end(m_chunks);)
 		{
-			float dx{ abs(it->first.first - currentChunkX) };
-			float dz{ abs(it->first.second - currentChunkZ) };
+			int dx{ abs(it->first.first - currentChunkX) };
+			int dz{ abs(it->first.second - currentChunkZ) };
 
 			if (dx > NUM_CHUNCKS_TO_DISPLAY || dz > NUM_CHUNCKS_TO_DISPLAY)
 			{
@@ -34,16 +34,16 @@ namespace Engine
 		/*
 		* Load chunks inside visualization distance
 		*/
-		for (int x{ (int)currentChunkX - NUM_CHUNCKS_TO_DISPLAY }; x < (int)currentChunkX + NUM_CHUNCKS_TO_DISPLAY; ++x)
+		for (int x{ currentChunkX - NUM_CHUNCKS_TO_DISPLAY }; x < currentChunkX + NUM_CHUNCKS_TO_DISPLAY; ++x)
 		{
-			for (int z{ (int)currentChunkZ - NUM_CHUNCKS_TO_DISPLAY }; z < (int)currentChunkZ + NUM_CHUNCKS_TO_DISPLAY; ++z)
+			for (int z{ currentChunkZ - NUM_CHUNCKS_TO_DISPLAY }; z < currentChunkZ + NUM_CHUNCKS_TO_DISPLAY; ++z)
 			{
 				auto chunkKey{ std::make_pair(x, z) };
 
 				if (m_chunks.find(chunkKey) == m_chunks.end())
 				{
-					float xPos{ (float)x * (float)CHUNK_WIDTH };
-					float zPos{ (float)z * (float)CHUNK_HEIGHT };
+					int xPos{ x * CHUNK_WIDTH };
+					int zPos{ z * CHUNK_HEIGHT };
 					m_chunks[chunkKey] = std::make_unique<Chunk>(xPos, zPos, CHUNK_WIDTH, CHUNK_HEIGHT);
 				}
 				else{}

@@ -36,15 +36,15 @@ namespace Engine
         perlinRidgedMultiNoise.SetFrequency(0.1);
         perlinRidgedMultiNoise.SetLacunarity(2.0);
 
-        m_vertices.reserve(m_width * m_height * 3);
-        m_indices.reserve((m_width - 1) * (m_height - 1) * 6);
+        m_vertices.reserve((m_width + 1) * (m_height + 1) * 3);
+        m_indices.reserve(m_width * m_height * 6);
 
         float scale{ 0.05f };
         float amplitude{ 20.0f };
 
-        for (unsigned int z{ 0 }; z < m_height; ++z)
+        for (unsigned int z{ 0 }; z < m_height + 1; ++z)
         {
-            for (unsigned int x{ 0 }; x < m_width; ++x)
+            for (unsigned int x{ 0 }; x < m_width + 1; ++x)
             {
                 float xPos{ m_position.x + static_cast<float>(x) };
                 float zPos{ m_position.z + static_cast<float>(z) };
@@ -57,14 +57,14 @@ namespace Engine
             }
         }
 
-        for (unsigned int i{ 0 }; i < m_height - 1; ++i)
+        for (unsigned int i{ 0 }; i < m_height; ++i)
         {
-            for (unsigned int j{ 0 }; j < m_width - 1; ++j)
+            for (unsigned int j{ 0 }; j < m_width; ++j)
             {
-                unsigned int topLeft{ i * m_width + j };
+                unsigned int topLeft{ i * (m_width + 1) + j };
                 unsigned int topRight{ topLeft + 1 };
 
-                unsigned int bottomLeft{ topLeft + m_width };
+                unsigned int bottomLeft{ (i + 1) * (m_width + 1) + j };
                 unsigned int bottomRight{ bottomLeft + 1 };
 
                 m_indices.push_back(topLeft);
@@ -105,9 +105,9 @@ namespace Engine
         float playerHeight{ 2.7f };
 
         // Get vertices index around (x,y) position
-        int x0{ static_cast<int>(floor(abs(x))) };
+        int x0{ static_cast<int>(round(abs(x))) };
         int x1{ x0 + 1 };
-        int z0{ static_cast<int>(floor(abs(z))) };
+        int z0{ static_cast<int>(round(abs(z))) };
         int z1{ z0 + 1 };
 
         // Interpolate terrain height at (x, y) position
