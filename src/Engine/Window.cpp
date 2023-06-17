@@ -15,10 +15,6 @@ namespace Engine
 	unsigned int Window::width = 0;
 	unsigned int Window::height = 0;  
 	bool Window::useWireFrame = false;
-	Camera Window::camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f),		// Position
-									glm::vec3(0.0f, 1.0f, 0.0f),	// UpDirection
-									0,								// Yaw
-									0);								// Pitch
 	float Window::deltaTime = 0.0f;
 	float Window::lastFrame = 0.0f;
 	bool Window::isFirstMouse = true;
@@ -73,7 +69,7 @@ namespace Engine
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	void Window::ProcessInput() const noexcept
+	void Window::ProcessInput() noexcept
 	{
 		if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		{
@@ -86,25 +82,25 @@ namespace Engine
 		*/
 		if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
 		{
-			camera.ProcessKeyboard(MOTION::FORWARD, deltaTime);
+			Camera::ProcessKeyboard(MOTION::FORWARD, deltaTime);
 		}
 		else {}
 
 		if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
 		{
-			camera.ProcessKeyboard(MOTION::BACKWARD, deltaTime);
+			Camera::ProcessKeyboard(MOTION::BACKWARD, deltaTime);
 		}
 		else {}
 
 		if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
 		{
-			camera.ProcessKeyboard(MOTION::LEFT, deltaTime);
+			Camera::ProcessKeyboard(MOTION::LEFT, deltaTime);
 		}
 		else {}
 
 		if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
 		{
-			camera.ProcessKeyboard(MOTION::RIGHT, deltaTime);
+			Camera::ProcessKeyboard(MOTION::RIGHT, deltaTime);
 		}
 		else {}
 
@@ -133,7 +129,7 @@ namespace Engine
 		glfwTerminate();
 	}
 
-	void Window::UpdateTime() const noexcept
+	void Window::UpdateTime() noexcept
 	{
 		float currentFrame{ (float)glfwGetTime() };
 		deltaTime = currentFrame - lastFrame;
@@ -144,20 +140,6 @@ namespace Engine
 	{
 		glfwSwapBuffers(m_window);
 		glfwWaitEvents();
-	}
-
-	void Window::SetViewPosition(glm::vec3 const& position)
-	{
-		camera.SetPosition(position);
-	}
-
-
-	void Window::UpdateCameraPos(float const& ypos) noexcept
-	{
-		glm::vec3 pos{ camera.Position() };
-		pos.y = ypos;
-
-		camera.SetPosition(pos);
 	}
 
 	/*
@@ -184,11 +166,11 @@ namespace Engine
 		lastXpos = (float)xpos;
 		lastYpos = (float)ypos;
 
-		camera.ProcessCursorPos(xoffset, yoffset);
+		Camera::ProcessCursorPos(xoffset, yoffset);
 	}
 
 	void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	{
-		camera.ProcessScroll((float)yoffset);
+		Camera::ProcessScroll((float)yoffset);
 	}
 }

@@ -2,37 +2,60 @@
 
 namespace Engine
 {
-	Camera::Camera(glm::vec3 const& position, glm::vec3 const& upDirection, float const& yaw, float const& pitch) noexcept
+	std::unique_ptr <Camera> Camera::camera_ = nullptr;
+	glm::vec3 Camera::position_ = glm::vec3(0.0f, 0.0f, 0.0f);
+	float Camera::zoom_ = ZOOM;
+	glm::vec3 Camera::frontDirection_ = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 Camera::upDirection_ = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 Camera::rightDirection_ = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 Camera::worldUp_ = upDirection_;
+	float Camera::yaw_ = YAW;
+	float Camera::pitch_ = PITCH;
+
+	/**
+	 * Static methods should be defined outside the class.
+	 */
+	std::unique_ptr <Camera>& Camera::GetInstance()
 	{
-		m_position = position;
-		m_frontDirection = glm::vec3(0.0f, 0.0f, -1.0f);
-		m_worldUp = upDirection;
-		m_yaw = yaw;
-		m_pitch = pitch;
+		/**
+		 * This is a safer way to create an instance. instance = new Singleton is
+		 * dangeruous in case two instance threads wants to access at the same time
+		 */
+		if (camera_ == nullptr) 
+		{
+			camera_ = std::make_unique <Camera>();
 
-		m_zoom = ZOOM;
-		m_sensitivity = SENSITIVITY;
-		m_speed = SPEED;
+			// Update vectors
+			glm::vec3 front{};
+			front.x = cos(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+			front.y = sin(glm::radians(pitch_));
+			front.z = sin(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+			frontDirection_ = glm::normalize(front);
 
-		Update();
+			rightDirection_ = glm::normalize(glm::cross(frontDirection_, worldUp_));
+			upDirection_ = glm::normalize(glm::cross(rightDirection_, frontDirection_));
+		}
+		else{}
+		
+		return camera_;
 	}
 
 	void Camera::ProcessKeyboard(MOTION const motion, float const& deltaTime) noexcept
 	{
-		float velocity{ deltaTime * m_speed };
+		float velocity{ deltaTime * SPEED };
 		switch (motion)
 		{
 		case MOTION::FORWARD:
-			m_position += m_frontDirection * velocity;
+			position_ += frontDirection_ * velocity;
 			break;
 		case MOTION::BACKWARD:
-			m_position -= m_frontDirection * velocity;
+			position_ -= frontDirection_ * velocity;
 			break;
 		case MOTION::LEFT:
-			m_position -= m_rightDirection * velocity;
+			position_ -= rightDirection_ * velocity;
 			break;
 		case MOTION::RIGHT:
-			m_position += m_rightDirection * velocity;
+			position_ += rightDirection_ * velocity;
 			break;
 		default:
 			break;
@@ -41,62 +64,58 @@ namespace Engine
 
 	void Camera::ProcessCursorPos(float const& xoffset, float const& yoffset, bool const constrainPitch) noexcept
 	{
-		float deltaX{ xoffset * m_sensitivity };
-		float deltaY{ yoffset * m_sensitivity };
+		float deltaX{ xoffset * SENSITIVITY };
+		float deltaY{ yoffset * SENSITIVITY };
 
-		m_yaw += deltaX;
-		m_pitch += deltaY;
+		yaw_ += deltaX;
+		pitch_ += deltaY;
 
 		if (constrainPitch)
 		{
-			if (m_pitch < -89.0f)
+			if (pitch_ < -89.0f)
 			{
-				m_pitch = -89.0f;
+				pitch_ = -89.0f;
 			}
 			else {}
 
-			if (m_pitch > 89.0f)
+			if (pitch_ > 89.0f)
 			{
-				m_pitch = 89.0f;
+				pitch_ = 89.0f;
 			}
 			else {}
 		}
 		else {}
 
-		Update();
+		// Update vectors
+		glm::vec3 front{};
+		front.x = cos(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+		front.y = sin(glm::radians(pitch_));
+		front.z = sin(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+		frontDirection_ = glm::normalize(front);
+
+		rightDirection_ = glm::normalize(glm::cross(frontDirection_, worldUp_));
+		upDirection_ = glm::normalize(glm::cross(rightDirection_, frontDirection_));
 	}
 
 	void Camera::ProcessScroll(float const& yoffset) noexcept
 	{
-		m_zoom -= yoffset;
+		zoom_ -= yoffset;
 
-		if (m_zoom < 1.0f)
+		if (zoom_ < 1.0f)
 		{
-			m_zoom = 1.0f;
+			zoom_ = 1.0f;
 		}
 		else {}
 
-		if (m_zoom > ZOOM)
+		if (zoom_ > ZOOM)
 		{
-			m_zoom = ZOOM;
+			zoom_ = ZOOM;
 		}
 		else {}
 	}
 
-	void Camera::Update() noexcept
+	void Camera::UpdateHeight(float const& height) noexcept
 	{
-		glm::vec3 front{};
-		front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-		front.y = sin(glm::radians(m_pitch));
-		front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-		m_frontDirection = glm::normalize(front);
-
-		m_rightDirection = glm::normalize(glm::cross(m_frontDirection, m_worldUp));
-		m_upDirection = glm::normalize(glm::cross(m_rightDirection, m_frontDirection));
-	}
-
-	void Camera::SetPosition(glm::vec3 const& position) noexcept
-	{
-		m_position = position;
+		position_.y = height;
 	}
 }

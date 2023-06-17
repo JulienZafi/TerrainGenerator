@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <memory>
+
 namespace Engine
 {
 /*
@@ -23,55 +25,69 @@ namespace Engine
 	class Camera
 	{
 	public:
-		Camera() = delete;
+		Camera() = default;
 		~Camera() = default;
 
-		Camera(glm::vec3 const& position, glm::vec3 const& upDirection = glm::vec3(0.0f, 1.0f, 0.0f), float const& yaw = YAW, float const& pitch = PITCH) noexcept;
+		/**
+		* Singletons should not be cloneable.
+		*/
+		Camera(Camera& camera) = delete;
+		/**
+		 * Singletons should not be assignable.
+		 */
+		void operator=(const Camera&) = delete;
+		/**
+		 * This is the static method that controls the access to the singleton
+		 * instance. On the first run, it creates a singleton object and places it
+		 * into the static field. On subsequent runs, it returns the client existing
+		 * object stored in the static field.
+		 */
+		static std::unique_ptr <Camera>& GetInstance();
+
+		//Camera(glm::vec3 const& position, glm::vec3 const& upDirection = glm::vec3(0.0f, 1.0f, 0.0f), float const& yaw = YAW, float const& pitch = PITCH) noexcept;
 
 		/*
 		* PROCESS USER INPUTS
 		*/
-		void ProcessKeyboard(MOTION const motion, float const &deltaTime) noexcept;
-		void ProcessCursorPos(float const& xoffset, float const& yoffset, bool const constrainPitch = true) noexcept;
-		void ProcessScroll(float const& yoffset) noexcept;
+		static void ProcessKeyboard(MOTION const motion, float const &deltaTime) noexcept;
+		static void ProcessCursorPos(float const& xoffset, float const& yoffset, bool const constrainPitch = true) noexcept;
+		static void ProcessScroll(float const& yoffset) noexcept;
 
 		/*
 		* GETTERS
 		*/
-		[[nodiscard]] inline const glm::vec3 Position() const noexcept { return m_position; }
-		[[nodiscard]] inline const glm::vec3 FrontDirection() const noexcept { return m_frontDirection; }
-		[[nodiscard]] inline const float Zoom() const noexcept { return m_zoom; }
-		[[nodiscard]] inline const glm::mat4 ViewMatrix() const noexcept { return glm::lookAt(m_position, m_position + m_frontDirection, m_upDirection); }
+		[[nodiscard]] inline const glm::vec3 Position() const noexcept { return position_; }
+		[[nodiscard]] inline const glm::vec3 FrontDirection() const noexcept { return frontDirection_; }
+		[[nodiscard]] inline const float Zoom() const noexcept { return zoom_; }
+		[[nodiscard]] inline const glm::mat4 ViewMatrix() const noexcept { return glm::lookAt(position_, position_ + frontDirection_, upDirection_); }
 
 		/*
 		* SETTERS
 		*/
-		void SetPosition(glm::vec3 const &position) noexcept;
+		static void UpdateHeight(float const& height) noexcept;
 
 	private:
 		/*
 		* POSITIONS & DIRECTIONS
-		*/
-		glm::vec3 m_position;
-		
-		glm::vec3 m_frontDirection;
-		glm::vec3 m_upDirection;
-		glm::vec3 m_rightDirection;
-		glm::vec3 m_worldUp;
+		*/		
+		static glm::vec3 frontDirection_;
+		static glm::vec3 upDirection_;
+		static glm::vec3 rightDirection_;
+		static glm::vec3 worldUp_;
 
 		/*
 		* EULER ANGLES
 		*/
-		float m_yaw;
-		float m_pitch;
+		static float yaw_;
+		static float pitch_;
 
 		/*
-		* OPTIONS
+		* SINGLETON INSTANCE
 		*/
-		float m_speed;
-		float m_sensitivity;
-		float m_zoom;
+		static std::unique_ptr <Camera> camera_;
 
-		void Update() noexcept;
+		static glm::vec3 position_;
+
+		static float zoom_;
 	};
 }

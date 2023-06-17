@@ -5,6 +5,8 @@
 #include "Engine/Window.hpp"
 #include "Application/App.hpp"
 
+#include "Engine/Camera.hpp"
+
 /*
 * WINDOW DEFAULT PROPERTIES
 */
@@ -16,17 +18,15 @@
 * MAP PROPERTIES
 */
 #define MAP_DIM	256
-glm::vec3 const MAP_CENTER { MAP_DIM / 2.0f, 0.0f, MAP_DIM / 2.0f };
 
 int main()
 {
 	std::unique_ptr<Engine::Window> window{ std::make_unique<Engine::Window>(WIDTH, HEIGHT, TITLE) };
-	window->SetViewPosition(MAP_CENTER);
 
 	/*
 	* RENDER LOOP
 	*/
-	std::unique_ptr <Application::Application> app{ std::make_unique<Application::Application>(MAP_CENTER) };
+	std::unique_ptr <Application::Application> app{ std::make_unique<Application::Application>() };
 	while (!window->ShouldClose())
 	{
 		window->UpdateTime();
