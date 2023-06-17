@@ -52,7 +52,8 @@ namespace Application
 		/*
 		* Update Camera height
 		*/
-		float height{ m_terrain->GetHeightAtPos(Engine::Camera::GetInstance()->Position().x, Engine::Camera::GetInstance()->Position().z) };
+		//float height{ m_terrain->GetHeightAtPos(Engine::Camera::GetInstance()->Position().x, Engine::Camera::GetInstance()->Position().z) };
+		float height{ 50.0f };
 		Engine::Camera::UpdateHeight(height);
 	}
 }
