@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Camera.hpp"
 #include "Chunk.hpp"
 #include "Shader.hpp"
 
@@ -16,21 +17,19 @@ namespace Engine
 	class Terrain
 	{
 	public:
-		Terrain() = default;
+		Terrain() noexcept;
 		~Terrain() = default;
 
-		void UpdateChunks() noexcept;
+		void UpdateChunks(float const& x, float const& z) noexcept;
 		void UpdatePlayerPosition(float const& x, float const& z) noexcept;
 
-		const float GetHeightAtPos(float const& x, float const& z) const noexcept;
+		const float GetHeightAtPos(float const& x, float const& z) noexcept;
 		void RenderChunks(Shader const& terrainShader) const noexcept;
 
 		[[nodiscard]] inline const unsigned int Width(){ return (NUM_CHUNCKS_TO_DISPLAY * CHUNK_WIDTH); }
 		[[nodiscard]] inline const unsigned int Height(){ return (NUM_CHUNCKS_TO_DISPLAY * CHUNK_HEIGHT); }
 
 	private:
-		float m_playerX;
-		float m_playerZ;
 		std::map <std::pair <int, int>, std::unique_ptr <Chunk>> m_chunks;
 	};
 }

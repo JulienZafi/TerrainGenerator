@@ -54,6 +54,7 @@ namespace Engine
                 m_vertices.push_back(xPos);
                 m_vertices.push_back(yPos);
                 m_vertices.push_back(zPos);
+
             }
         }
 
@@ -110,7 +111,7 @@ namespace Engine
         int z0{ static_cast<int>(round(abs(z))) };
         int z1{ z0 + 1 };
 
-        // Interpolate terrain height at (x, y) position
+        // Interpolate terrain he  ight at (x, y) position
         float fx{ abs(x) - x0 };
         float fz{ abs(z) - z0 };
         float h00{ m_vertices[(z0 * m_width + x0) * 3 + 1] };

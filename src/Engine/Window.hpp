@@ -2,6 +2,7 @@
 
 #include "Camera.hpp"
 
+#include <memory>
 #include <string_view>
 
 struct GLFWwindow;
@@ -23,12 +24,12 @@ namespace Engine
 		/*
 		* UPDATE CURRENT DELTATIME
 		*/
-		void UpdateTime() const noexcept;
+		void UpdateTime() noexcept;
 
 		/*
 		* USER INPUTS
 		*/
-		void ProcessInput() const noexcept;
+		void ProcessInput() noexcept;
 		void Wait() const noexcept;
 
 		/*
@@ -43,15 +44,6 @@ namespace Engine
 		[[nodiscard]] inline const unsigned int Width() const noexcept { return width; }
 		[[nodiscard]] inline const unsigned int Height() const noexcept { return height; }
 		[[nodiscard]] inline const GLFWwindow* GetInstance() const noexcept { return m_window; }
-		[[nodiscard]] inline const glm::mat4 ViewMatrix() const noexcept { return camera.ViewMatrix(); }
-		[[nodiscard]] inline const float Zoom() const noexcept { return camera.Zoom(); }
-		[[nodiscard]] inline const glm::vec3 CameraPosition() const noexcept { return camera.Position(); }
-
-		/*
-		* SETTERS
-		*/
-		void SetViewPosition(glm::vec3 const& position);
-		void UpdateCameraPos(float const &ypos) noexcept;
 
 	private:
 		static unsigned int width;
@@ -69,11 +61,6 @@ namespace Engine
 		static void framebuffersize_callback(GLFWwindow* window, int width, int height);
 		static void cursorpos_callback(GLFWwindow* window, double xpos, double ypos);
 		static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
-		/*
-		* CAMERA INSTANCE
-		*/
-		static Camera camera;
 		
 		/*
 		* TIMING

@@ -1,17 +1,28 @@
 #include "Terrain.hpp"
+#include "Window.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <iostream>
+
 namespace Engine
 {
-	void Terrain::UpdateChunks() noexcept
+	Terrain::Terrain() noexcept
+	{
+		float initialX = (float)CHUNK_WIDTH * (float)NUM_CHUNCKS_TO_DISPLAY / 2.0f;
+		float initialZ = (float)CHUNK_HEIGHT * (float)NUM_CHUNCKS_TO_DISPLAY / 2.0f;
+
+		UpdatePlayerPosition(initialX, initialZ);
+	}
+
+	void Terrain::UpdateChunks(float const& x, float const& z) noexcept
 	{
 		/*
 		* Current chunk coordinates
 		*/
-		int currentChunkX{ (int)round(m_playerX / CHUNK_WIDTH) };
-		int currentChunkZ{ (int)round(m_playerZ / CHUNK_HEIGHT)};
+		int currentChunkX{ (int)round(x / (float)CHUNK_WIDTH) };
+		int currentChunkZ{ (int)round(z / (float)CHUNK_HEIGHT) };
 
 		/*
 		* Delete chunks outside visualization distance
@@ -53,36 +64,54 @@ namespace Engine
 
 	void Terrain::UpdatePlayerPosition(float const& x, float const& z) noexcept
 	{
-		m_playerX = x;
-		m_playerZ = GetHeightAtPos(x, z);
+		/*
+		* Calculate the chunk where the player is
+		*/
+		int currentChunkX = (int)round(x / (float)CHUNK_WIDTH);
+		int currentChunkZ = (int)round(z / (float)CHUNK_HEIGHT);
 
-		UpdateChunks();
+		/*
+		* Generate missing chunks around player
+		*/
+		for (int dx = -NUM_CHUNCKS_TO_DISPLAY; dx <= NUM_CHUNCKS_TO_DISPLAY; ++dx)
+		{
+			for (int dz = -NUM_CHUNCKS_TO_DISPLAY; dz <= NUM_CHUNCKS_TO_DISPLAY; ++dz)
+			{
+				int chunkX = currentChunkX + dx;
+				int chunkZ = currentChunkZ + dz;
+				std::pair<int, int> chunkKey = std::make_pair(chunkX, chunkZ);
+
+				if (m_chunks.find(chunkKey) == m_chunks.end())
+				{
+					int xPos = chunkX * CHUNK_WIDTH;
+					int zPos = chunkZ * CHUNK_HEIGHT;
+					m_chunks[chunkKey] = std::make_unique<Chunk>(xPos, zPos, CHUNK_WIDTH, CHUNK_HEIGHT);
+				}
+				else{}
+			}
+		}
+
+		UpdateChunks(x, z);
 	}
 
-	const float Terrain::GetHeightAtPos(float const& x, float const& z) const noexcept
+	const float Terrain::GetHeightAtPos(float const& x, float const& z) noexcept
 	{
 		float height{ 0.0f };
 
 		/*
 		* Get chunk containing position (x,z)
 		*/
-		float chunkX = x / (float)CHUNK_WIDTH;
-		float chunkZ = z / (float)CHUNK_HEIGHT;
+		int currentChunkX = (int)round(x / (float)CHUNK_WIDTH);
+		int currentChunkZ = (int)round(z / (float)CHUNK_HEIGHT);
 
-		std::pair <int, int> chunkKey = std::make_pair((int)chunkX, (int)chunkZ);
+		std::pair <int, int> chunkKey = std::make_pair(currentChunkX, currentChunkZ);
 		auto chunkIt = m_chunks.find(chunkKey);
 
-		/*
-		* Get height if chunk exists
-		*/
-		if (chunkIt != m_chunks.end()) 
+		if (chunkIt != std::end(m_chunks))
 		{
 			height = chunkIt->second->GetHeightAtPos(x, z);
 		}
-		else
-		{
-			//height = z;
-		}
+		else{}
 
 		return height;
 	}
