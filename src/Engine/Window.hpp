@@ -12,6 +12,16 @@ namespace Engine
 #define ENGINE_MAJOR_VERSION 4
 #define ENGINE_MINOR_VERSION 1
 
+	struct Keyboard
+	{
+		bool is_Esc_pressed;
+		bool is_W_pressed;
+		bool is_S_pressed;
+		bool is_A_pressed;
+		bool is_D_pressed;
+		bool is_Space_pressed;
+	};
+
 	class Window
 	{
 	public:
@@ -61,6 +71,7 @@ namespace Engine
 		static void framebuffersize_callback(GLFWwindow* window, int width, int height);
 		static void cursorpos_callback(GLFWwindow* window, double xpos, double ypos);
 		static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+		static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 		
 		/*
 		* TIMING
@@ -74,5 +85,10 @@ namespace Engine
 		static float lastXpos;
 		static float lastYpos;
 		static bool isFirstMouse;
+
+		/*
+		* KEYBOARD INPUTS
+		*/
+		static Keyboard keys;
 	};
 }
