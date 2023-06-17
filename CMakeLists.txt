@@ -17,11 +17,6 @@ endif()
 set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR}) # project dir
 set(BINARIES_DIR ${PROJECT_ROOT}/build) # binaries dir
 
-# turn on use of MFC library
-add_definitions(-D UNICODE)
-add_definitions(-D _UNICODE)
-set(CMAKE_MFC_FLAG 2)
-
 # project declaration
 file(GLOB_RECURSE SOURCES "src/*.c*" "src/*.h*")
 add_executable(terrainGenerator ${SOURCES})

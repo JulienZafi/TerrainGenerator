@@ -20,6 +20,7 @@ namespace Engine
 	bool Window::isFirstMouse = true;
 	float Window::lastXpos = 0.0f;
 	float Window::lastYpos = 0.0f;
+	Keyboard Window::keys = Keyboard();
 
 	Window::Window(unsigned int const width, unsigned int const height, std::string_view const& title) noexcept
 	{
@@ -65,13 +66,14 @@ namespace Engine
 		glfwSetFramebufferSizeCallback(m_window, framebuffersize_callback);
 		glfwSetCursorPosCallback(m_window, cursorpos_callback);
 		glfwSetScrollCallback(m_window, scroll_callback);
+		glfwSetKeyCallback(m_window, key_callback);
 
 		glEnable(GL_DEPTH_TEST);
 	}
 
 	void Window::ProcessInput() noexcept
 	{
-		if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		if (keys.is_Esc_pressed)
 		{
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
 		}
@@ -80,31 +82,31 @@ namespace Engine
 		/*
 		* CAMERA MOTION
 		*/
-		if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
+		if (keys.is_W_pressed)
 		{
 			Camera::ProcessKeyboard(MOTION::FORWARD, deltaTime);
 		}
 		else {}
 
-		if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
+		if (keys.is_S_pressed)
 		{
 			Camera::ProcessKeyboard(MOTION::BACKWARD, deltaTime);
 		}
 		else {}
 
-		if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
+		if (keys.is_A_pressed)
 		{
 			Camera::ProcessKeyboard(MOTION::LEFT, deltaTime);
 		}
 		else {}
 
-		if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
+		if (keys.is_D_pressed)
 		{
 			Camera::ProcessKeyboard(MOTION::RIGHT, deltaTime);
 		}
 		else {}
 
-		if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
+		if (keys.is_Space_pressed)
 		{
 			useWireFrame = !useWireFrame;
 			if (useWireFrame)
@@ -172,5 +174,63 @@ namespace Engine
 	void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	{
 		Camera::ProcessScroll((float)yoffset);
+	}
+
+	void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+	{
+		if (action == GLFW_PRESS) 
+		{
+
+			switch (key)
+			{
+			case GLFW_KEY_ESCAPE:
+				keys.is_Esc_pressed = true;
+				break;
+			case GLFW_KEY_W:
+				keys.is_W_pressed = true;
+				break;
+			case GLFW_KEY_S:
+				keys.is_S_pressed = true;
+				break;
+			case GLFW_KEY_A:
+				keys.is_A_pressed = true;
+				break;
+			case GLFW_KEY_D:
+				keys.is_D_pressed = true;
+				break;
+			case GLFW_KEY_SPACE:
+				keys.is_Space_pressed = true;
+				break;
+			default:
+				break;
+			}
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			switch (key)
+			{
+			case GLFW_KEY_ESCAPE:
+				keys.is_Esc_pressed = false;
+				break;
+			case GLFW_KEY_W:
+				keys.is_W_pressed = false;
+				break;
+			case GLFW_KEY_S:
+				keys.is_S_pressed = false;
+				break;
+			case GLFW_KEY_A:
+				keys.is_A_pressed = false;
+				break;
+			case GLFW_KEY_D:
+				keys.is_D_pressed = false;
+				break;
+			case GLFW_KEY_SPACE:
+				keys.is_Space_pressed = false;
+				break;
+			default:
+				break;
+			}
+		}
+		else{}
 	}
 }
