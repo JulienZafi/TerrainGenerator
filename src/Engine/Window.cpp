@@ -47,7 +47,7 @@ namespace Engine
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-		m_window = glfwCreateWindow((int)width, (int)height, title.data(), nullptr, nullptr);
+		m_window = glfwCreateWindow((int)width, (int)height, title.data(), glfwGetPrimaryMonitor(), nullptr);
 
 		if (!m_window)
 		{

@@ -2,11 +2,5 @@
 # Ce fichier .gitignore a été automatiquement créé par Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/TerrainGenerator/v17
-/.vs/TerrainGenerator/FileContentIndex
-/build/x64-Debug
-/.vs/CMake Overview
-/.vs/ProjectSettings.json
-/.vs/slnx.sqlite
-/.vs/slnx.sqlite-journal
-/.vs/VSWorkspaceState.json
+/.vs/*
+/build/*
