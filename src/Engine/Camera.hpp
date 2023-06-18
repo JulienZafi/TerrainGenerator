@@ -44,8 +44,6 @@ namespace Engine
 		 */
 		static std::unique_ptr <Camera>& GetInstance();
 
-		//Camera(glm::vec3 const& position, glm::vec3 const& upDirection = glm::vec3(0.0f, 1.0f, 0.0f), float const& yaw = YAW, float const& pitch = PITCH) noexcept;
-
 		/*
 		* PROCESS USER INPUTS
 		*/

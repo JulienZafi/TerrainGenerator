@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef IMGUI_IMPL_OPENGL_LOADER_GLAD
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
+#endif
+
 #include "Camera.hpp"
 
 #include <memory>
@@ -32,7 +36,14 @@ namespace Engine
 		Window(unsigned int const width = 800, unsigned int const height = 600, std::string_view const& title = "Window") noexcept;
 
 		/*
-		* UPDATE CURRENT DELTATIME
+		* UI
+		*/
+		void InitGUI() const;
+		void startImGUIFrame() const;
+		void DrawGUI() const;
+
+		/*
+		* UPDATE
 		*/
 		void UpdateTime() noexcept;
 
@@ -58,9 +69,6 @@ namespace Engine
 	private:
 		static unsigned int width;
 		static unsigned int height;
-
-		static bool useWireFrame;
-
 		GLFWwindow *m_window = nullptr;
 
 		void Create(std::string_view const& title) noexcept;
@@ -90,5 +98,6 @@ namespace Engine
 		* KEYBOARD INPUTS
 		*/
 		static Keyboard keys;
+		static bool useWireFrame;
 	};
 }

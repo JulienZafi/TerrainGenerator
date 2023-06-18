@@ -4,17 +4,19 @@
 #include <noise/noise.h>
 
 #include <iostream>
+#include <imgui/imgui.h>
 
 namespace Engine
 {
-    Chunk::Chunk(float const &xPos, float const &zPos, unsigned int const width, unsigned int const height) noexcept
+    Chunk::Chunk(PerlinParams const& perlinParams, float const &xPos, float const &zPos, unsigned int const width, unsigned int const height) noexcept
     {
         m_position = glm::vec3(xPos, 0.0f, zPos);
         m_width = width;
         m_height = height;
 
+        log(perlinParams.numOctaves);
+        SetPerlinParams(perlinParams);
         Generate();
-
         SetupMesh();
     }
 
@@ -25,22 +27,28 @@ namespace Engine
         glDeleteBuffers(1, &m_EBO);
     }
 
+    void Chunk::SetPerlinParams(PerlinParams const& perlinParams) noexcept
+    {
+        m_perlinParams = perlinParams;
+    }
+
     void Chunk::Generate() noexcept
     {
         noise::module::Perlin perlinNoise{};
-        perlinNoise.SetOctaveCount(8);
-        perlinNoise.SetPersistence(0.5);
+        perlinNoise.SetOctaveCount(m_perlinParams.numOctaves);
+
+        perlinNoise.SetPersistence(m_perlinParams.persistence);
 
         noise::module::RidgedMulti perlinRidgedMultiNoise{};
-        perlinRidgedMultiNoise.SetOctaveCount(6);
-        perlinRidgedMultiNoise.SetFrequency(0.1);
-        perlinRidgedMultiNoise.SetLacunarity(2.0);
+        perlinRidgedMultiNoise.SetOctaveCount(m_perlinParams.multiNoiseNumOctaves);
+        perlinRidgedMultiNoise.SetFrequency(m_perlinParams.frequency);
+        perlinRidgedMultiNoise.SetLacunarity(m_perlinParams.lacunarity);
 
         m_vertices.reserve((m_width + 1) * (m_height + 1) * 3);
         m_indices.reserve(m_width * m_height * 6);
 
-        float scale{ 0.05f };
-        float amplitude{ 20.0f };
+        float scale{ m_perlinParams.scale };
+        float amplitude{ m_perlinParams.amplitude };
 
         for (unsigned int z{ 0 }; z < m_height + 1; ++z)
         {

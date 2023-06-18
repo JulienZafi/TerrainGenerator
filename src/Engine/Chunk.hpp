@@ -5,14 +5,26 @@
 
 namespace Engine
 {
+    struct PerlinParams
+    {
+        int numOctaves;
+        float persistence;
+        int multiNoiseNumOctaves;
+        float frequency;
+        float lacunarity;
+        float scale;
+        float amplitude;
+    };
+
     class Chunk
     {
     public:
         Chunk() = default;
-        Chunk(float const &xPos, float const &zPos, unsigned int const width, unsigned int const height) noexcept;
+        Chunk(PerlinParams const& perlinParams, float const &xPos, float const &zPos, unsigned int const width, unsigned int const height) noexcept;
         ~Chunk();
 
         void Generate() noexcept;
+        void SetPerlinParams(PerlinParams const &perlinParams) noexcept;
         void SetupMesh() noexcept;
 
         const float GetHeightAtPos(float const& x, float const& z) const noexcept;
@@ -29,5 +41,7 @@ namespace Engine
         std::vector<float> m_vertices;
         std::vector<unsigned int> m_indices;
         unsigned int m_VAO, m_VBO, m_EBO;
+
+        PerlinParams m_perlinParams;
     };
 }

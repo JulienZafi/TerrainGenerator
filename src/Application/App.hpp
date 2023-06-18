@@ -23,9 +23,18 @@ namespace Application
 
 		void Render(std::unique_ptr <Engine::Window>& window) noexcept;
 
+		void ShowGUI();
+
 	private:
 		std::unique_ptr <Engine::Terrain> m_terrain;
 
 		Engine::Shader m_terrainShader;
+
+		glm::vec3 m_clearColor;
+		float m_cameraAltitude;
+		float m_zNear;
+		float m_zFar;
+		float m_xpos;
+		float m_zpos;
 	};
 }

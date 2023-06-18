@@ -4,8 +4,10 @@
 
 #include "Engine/Window.hpp"
 #include "Application/App.hpp"
-
 #include "Engine/Camera.hpp"
+
+#include <imgui/imgui.h>
+
 
 /*
 * WINDOW DEFAULT PROPERTIES
@@ -14,14 +16,10 @@
 #define HEIGHT	1280
 #define TITLE	"3D Terrain Generator"
 
-/*
-* MAP PROPERTIES
-*/
-#define MAP_DIM	256
-
 int main()
 {
 	std::unique_ptr<Engine::Window> window{ std::make_unique<Engine::Window>(WIDTH, HEIGHT, TITLE) };
+	window->InitGUI();
 
 	/*
 	* RENDER LOOP
@@ -31,16 +29,20 @@ int main()
 	{
 		window->UpdateTime();
 		window->ProcessInput();
+		window->startImGUIFrame();
+
+		app->ShowGUI();
 
 		// --------------------
 
 		app->Render(window);
 
+		window->DrawGUI();
+
 		// --------------------
 
 		window->Wait();
 	}
-
 	window->Close();
 
 	return 0;

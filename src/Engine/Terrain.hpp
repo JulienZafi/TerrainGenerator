@@ -26,10 +26,17 @@ namespace Engine
 		const float GetHeightAtPos(float const& x, float const& z) noexcept;
 		void RenderChunks(Shader const& terrainShader) const noexcept;
 
-		[[nodiscard]] inline const unsigned int Width(){ return (NUM_CHUNCKS_TO_DISPLAY * CHUNK_WIDTH); }
-		[[nodiscard]] inline const unsigned int Height(){ return (NUM_CHUNCKS_TO_DISPLAY * CHUNK_HEIGHT); }
+		void ShowGUI() noexcept;
+
+		[[nodiscard]] inline const unsigned int Width(){ return (m_numChunksToDisplay * m_chunkWidth); }
+		[[nodiscard]] inline const unsigned int Height(){ return (m_numChunksToDisplay * m_chunkHeight); }
 
 	private:
 		std::map <std::pair <int, int>, std::unique_ptr <Chunk>> m_chunks;
+		int m_numChunksToDisplay;
+		int m_chunkWidth;
+		int m_chunkHeight;
+
+		PerlinParams m_perlinParams;
 	};
 }
