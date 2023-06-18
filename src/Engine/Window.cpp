@@ -1,9 +1,11 @@
-
 #include "Window.hpp"
 #include "Camera.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
 
 #include <iostream>
 
@@ -47,13 +49,16 @@ namespace Engine
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-		m_window = glfwCreateWindow((int)width, (int)height, title.data(), glfwGetPrimaryMonitor(), nullptr);
+		m_window = glfwCreateWindow((int)width, (int)height, title.data(), nullptr, nullptr);
 
 		if (!m_window)
 		{
 			std::cout << "ERROR::GLFW::WINDOW::FAILED_TO_CREATE!!!\n";
 		}
-		else{}
+		else
+		{
+			glfwMaximizeWindow(m_window);
+		}
 
 		glfwMakeContextCurrent(m_window);
 
@@ -69,6 +74,38 @@ namespace Engine
 		glfwSetKeyCallback(m_window, key_callback);
 
 		glEnable(GL_DEPTH_TEST);
+	}
+
+	void Window::InitGUI() const
+	{
+		/*
+		* Setup ImGui binding
+		*/
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+		ImGui::StyleColorsDark();
+
+		/*
+		* Setup Platform / Renderer bindings
+		*/
+		ImGui_ImplGlfw_InitForOpenGL(m_window, true);
+		const char* glsl_version = "#version 410";
+		ImGui_ImplOpenGL3_Init(glsl_version);
+	}
+	 
+	void Window::startImGUIFrame() const
+	{
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+	}
+
+	void Window::DrawGUI() const
+	{
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 
 	void Window::ProcessInput() noexcept
@@ -128,6 +165,13 @@ namespace Engine
 
 	void Window::Close() const noexcept
 	{
+		/*
+		* Stop GUI
+		*/
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
+
 		glfwTerminate();
 	}
 
