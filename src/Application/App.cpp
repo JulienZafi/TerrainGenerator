@@ -7,11 +7,14 @@
 
 #include <imgui/imgui.h>
 
+#include <iostream>
+
 namespace Application
 {
 	Application::Application() noexcept
 	{
 		m_terrain = std::make_unique <Engine::Terrain>();
+		m_terrain->BindTextures(m_terrainShader);
 
 		/*
 		* CREATE GPU PROGRAM
@@ -38,6 +41,8 @@ namespace Application
 		m_zpos = Engine::Camera::GetInstance()->Position().z;
 		m_terrain->UpdatePlayerPosition(m_xpos, m_zpos);
 
+		m_terrain->BindTextures(m_terrainShader);
+
 		m_terrainShader.UseProgram();
 
 		/*
@@ -59,7 +64,7 @@ namespace Application
 		/*
 		* RENDER
 		*/
-		m_terrain->RenderChunks(m_terrainShader);
+		m_terrain->Render(m_terrainShader);
 
 		/*
 		* Update Camera height
