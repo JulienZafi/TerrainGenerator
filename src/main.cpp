@@ -1,7 +1,3 @@
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#endif
-
 #include "Engine/Window.hpp"
 #include "Application/App.hpp"
 #include "Engine/Camera.hpp"
