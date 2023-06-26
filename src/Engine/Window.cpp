@@ -76,6 +76,11 @@ namespace Engine
 		glEnable(GL_DEPTH_TEST);
 	}
 
+	void Window::MakeCurrent() const noexcept
+	{
+		glfwMakeContextCurrent(m_window);
+	}
+
 	void Window::InitGUI() const
 	{
 		/*

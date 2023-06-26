@@ -40,6 +40,21 @@ namespace Engine
 		return camera_;
 	}
 
+	void Camera::MirrorY() noexcept
+	{
+		position_.y *= -1;
+	}
+
+	void Camera::Move(glm::vec3 const &position) noexcept
+	{
+		position_ += position;
+	}
+
+	void Camera::InvertPitch() noexcept
+	{
+		pitch_ = pitch_;
+	}
+
 	void Camera::ProcessKeyboard(MOTION const motion, float const& deltaTime) noexcept
 	{
 		float velocity{ deltaTime * SPEED };

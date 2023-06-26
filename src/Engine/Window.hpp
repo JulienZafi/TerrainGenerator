@@ -35,6 +35,8 @@ namespace Engine
 
 		Window(unsigned int const width = 800, unsigned int const height = 600, std::string_view const& title = "Window") noexcept;
 
+		void MakeCurrent() const noexcept;
+
 		/*
 		* UI
 		*/
