@@ -16,9 +16,6 @@ namespace Application
 		m_terrain = std::make_unique <Engine::Terrain>();
 		m_terrain->BindTextures(m_terrainShader);
 
-		/*
-		* CREATE GPU PROGRAM
-		*/
 		m_terrainShader = Engine::Shader(TERRAIN_VSHADER_PATH, TERRAIN_FSHADER_PATH);
 
 		m_clearColor = { 0.1f, 0.1f, 0.1f };
@@ -27,6 +24,9 @@ namespace Application
 		m_zFar = 100000.0f;
 		m_xpos = Engine::Camera::GetInstance()->Position().x;
 		m_zpos = Engine::Camera::GetInstance()->Position().z;
+
+		m_water = std::make_unique <Engine::Water>(m_xpos, m_zpos, m_terrain->Width(), m_terrain->Height());
+		m_waterShader = Engine::Shader(WATER_VSHADER_PATH, WATER_FSHADER_PATH);
 	}
 
 	void Application::Render(std::unique_ptr <Engine::Window>& window) noexcept
@@ -41,30 +41,35 @@ namespace Application
 		m_zpos = Engine::Camera::GetInstance()->Position().z;
 		m_terrain->UpdatePlayerPosition(m_xpos, m_zpos);
 
-		m_terrain->BindTextures(m_terrainShader);
-
-		m_terrainShader.UseProgram();
-
 		/*
-		* view / projection transformations
+		* transformation matrix
 		*/
 		glm::mat4 projection = glm::perspective(glm::radians(Engine::Camera::GetInstance()->Zoom()),
-												(float)m_terrain->Width() / (float)m_terrain->Height(), 
-												m_zNear,
-												m_zFar);
+			(float)m_terrain->Width() / (float)m_terrain->Height(),
+			m_zNear,
+			m_zFar);
 
 		glm::mat4 view = Engine::Camera::GetInstance()->ViewMatrix();
-		m_terrainShader.SetUniform<glm::mat4>("u_projection", projection);
-		m_terrainShader.SetUniform<glm::mat4>("u_view", view);
-
-		// world transformation
 		glm::mat4 model = glm::mat4(1.0f);
-		m_terrainShader.SetUniform<glm::mat4>("u_model", model);
 
 		/*
-		* RENDER
+		* RENDER TERRAIN
 		*/
+		m_terrainShader.UseProgram();
+		m_terrain->BindTextures(m_terrainShader);
+		m_terrainShader.SetUniform<glm::mat4>("u_projection", projection);
+		m_terrainShader.SetUniform<glm::mat4>("u_view", view);
+		m_terrainShader.SetUniform<glm::mat4>("u_model", model);
 		m_terrain->Render(m_terrainShader);
+
+		/*
+		* RENDER WATER
+		*/
+		m_waterShader.UseProgram();
+		m_waterShader.SetUniform<glm::mat4>("u_projection", projection);
+		m_waterShader.SetUniform<glm::mat4>("u_view", view);
+		m_waterShader.SetUniform<glm::mat4>("u_model", model);
+		m_water->Render(m_waterShader);
 
 		/*
 		* Update Camera height
