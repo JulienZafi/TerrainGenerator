@@ -55,6 +55,14 @@ namespace Engine
 			int location{ glGetUniformLocation(m_programID, name.data()) };
 			glUniform3f(location, value.x, value.y, value.z);
 		}
+
+		template<>
+		void SetUniform<glm::vec4>(std::string_view const& name, glm::vec4 const& value) const noexcept
+		{
+			int location{ glGetUniformLocation(m_programID, name.data()) };
+			// Définissez la valeur de la variable uniforme
+			glUniform4f(location, value.x, value.y, value.z, value.w);
+		}
 		
 		[[nodiscard]] inline void UseProgram() const noexcept { glUseProgram(m_programID); }
 
