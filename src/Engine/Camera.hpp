@@ -44,8 +44,6 @@ namespace Engine
 		 */
 		static std::unique_ptr <Camera>& GetInstance();
 
-		static void MirrorY() noexcept;
-
 		static void Move(glm::vec3 const &position) noexcept;
 
 		static void InvertPitch() noexcept;

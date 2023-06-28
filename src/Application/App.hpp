@@ -19,7 +19,7 @@ namespace Application
 	constexpr std::string_view const WATER_VSHADER_PATH{ "shaders//water//water.vs" };
 	constexpr std::string_view const WATER_FSHADER_PATH{ "shaders//water//water.fs" };
 	constexpr std::string_view const SKYBOX_VSHADER_PATH{ "shaders//skybox//skybox.vs" };
-	constexpr std::string_view const SKYBOX_FSHADER_PATH{ "shaders//skybox//skybox.vs" };
+	constexpr std::string_view const SKYBOX_FSHADER_PATH{ "shaders//skybox//skybox.fs" };
 
 	class Application
 	{
@@ -47,5 +47,9 @@ namespace Application
 		float m_zFar;
 		float m_xpos;
 		float m_zpos;
+
+		float m_waterWaveLength;
+		float m_waveFactor;
+		float m_waveSpeed;
 	};
 }
