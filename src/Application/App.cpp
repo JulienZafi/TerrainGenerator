@@ -13,13 +13,9 @@ namespace Application
 {
 	Application::Application() noexcept
 	{
-		m_skyboxShader = Engine::Shader(SKYBOX_VSHADER_PATH, SKYBOX_FSHADER_PATH);
-		m_skybox = std::make_unique <Engine::Skybox>();
-		m_skyboxShader.UseProgram();
-		m_skyboxShader.SetUniform("u_skyboxTexture", 0);
-
 		m_terrainShader = Engine::Shader(TERRAIN_VSHADER_PATH, TERRAIN_FSHADER_PATH);
 		m_terrain = std::make_unique <Engine::Terrain>();
+		m_terrainShader.UseProgram();
 		m_terrain->BindTextures(m_terrainShader);
 
 		m_clearColor = { 0.1f, 0.1f, 0.1f };
@@ -29,9 +25,17 @@ namespace Application
 		m_zFar = 100000.0f;
 		m_xpos = Engine::Camera::GetInstance()->Position().x;
 		m_zpos = Engine::Camera::GetInstance()->Position().z;
+		m_waterWaveLength = 0.01f;
+		m_waveSpeed = 0.03f;
+		m_waveFactor = 0.0f;
 
-		m_water = std::make_unique <Engine::Water>(m_xpos, m_zpos, m_terrain->Width(), m_terrain->Height());
+		m_water = std::make_unique <Engine::Water>(m_xpos, m_zpos, 500, 500);
 		m_waterShader = Engine::Shader(WATER_VSHADER_PATH, WATER_FSHADER_PATH);
+
+		m_skyboxShader = Engine::Shader(SKYBOX_VSHADER_PATH, SKYBOX_FSHADER_PATH);
+		m_skybox = std::make_unique <Engine::Skybox>();
+		m_skyboxShader.UseProgram();
+		m_skyboxShader.SetUniform("u_skyboxTexture", 0);
 	}
 
 	void Application::Render(std::unique_ptr <Engine::Window>& window) noexcept
@@ -55,67 +59,83 @@ namespace Application
 			(float)m_terrain->Width() / (float)m_terrain->Height(),
 			m_zNear,
 			m_zFar);
-
 		glm::mat4 view = Engine::Camera::GetInstance()->ViewMatrix();
 		glm::mat4 model = glm::mat4(1.0f);
+
+		// RENDER TO REFLECTION FRAMEBUFFER
+		m_water->BindReflectionFrameBuffer();
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		float cameraDistance{ 2 * (Engine::Camera::GetInstance()->Position().y) };
+		Engine::Camera::Move(glm::vec3(0.0f, -cameraDistance, 0.0f));
+		Engine::Camera::InvertPitch();
+		glm::mat4 reflectedView = Engine::Camera::GetInstance()->ViewMatrix(); // Recalculate the view matrix
 
 		m_terrainShader.UseProgram();
 		m_terrain->BindTextures(m_terrainShader);
 		m_terrainShader.SetUniform<glm::mat4>("u_projection", projection);
-		m_terrainShader.SetUniform<glm::mat4>("u_view", view);
 		m_terrainShader.SetUniform<glm::mat4>("u_model", model);
-
-		// RENDER TO REFLECTION FRAMEBUFFER
-		glm::vec3 cameraPos = Engine::Camera::GetInstance()->Position();
-		Engine::Camera::MirrorY(); // Mirror the camera on the water surface
-		glm::mat4 reflectedView = Engine::Camera::GetInstance()->ViewMatrix(); // Recalculate the view matrix
-
-		/*
-		* RENDER TERRAIN TO REFLECTION BUFFER
-		*/
-		m_water->BindReflectionFrameBuffer();
-		float cameraDistance{ 2 * (Engine::Camera::GetInstance()->Position().y) };
-		Engine::Camera::Move(glm::vec3(0.0f, -cameraDistance, 0.0f));
-		Engine::Camera::InvertPitch();
-		m_terrainShader.UseProgram();
 		m_terrainShader.SetUniform<glm::mat4>("u_view", reflectedView);
 		m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", m_clipPlane);
 
 		m_terrain->Render(m_terrainShader);
+
+		glDepthFunc(GL_LEQUAL);   // change depth function so depth test passes when values are equal to depth buffer's content
+		m_skyboxShader.UseProgram();
+		view = glm::mat4(glm::mat3(Engine::Camera::GetInstance()->ViewMatrix())); // remove translation from the view matrix
+		m_skyboxShader.SetUniform<glm::mat4>("u_view", view);
+		m_skyboxShader.SetUniform<glm::mat4>("u_projection", projection);
+		m_skybox->Render();
+		glDepthFunc(GL_LESS); // set depth function back to default
 		
 		/*
 		* RENDER TERRAIN TO REFRACTION BUFFER
 		*/
 		Engine::Camera::Move(glm::vec3(0.0f, cameraDistance, 0.0f));
 		Engine::Camera::InvertPitch();
+		reflectedView = Engine::Camera::GetInstance()->ViewMatrix(); // Recalculate the view matrix
 
-		m_water->BindRefractionFrameBuffer();
-		m_terrainShader.UseProgram();
-		m_terrainShader.SetUniform<glm::mat4>("u_view", reflectedView);
-		m_clipPlane.z *= -1;
-		m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", m_clipPlane);
+		//m_water->BindRefractionFrameBuffer();
+		//m_terrainShader.UseProgram();
+		//m_terrain->BindTextures(m_terrainShader);
+		//m_terrainShader.SetUniform<glm::mat4>("u_projection", projection);
+		//m_terrainShader.SetUniform<glm::mat4>("u_model", model);
+		//m_terrainShader.SetUniform<glm::mat4>("u_view", reflectedView);
+		//m_clipPlane.y *= -1;
+		//m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", m_clipPlane);
 
-		m_terrain->Render(m_terrainShader);
+		//m_terrain->Render(m_terrainShader);
+
+		//glDepthFunc(GL_LEQUAL);   // change depth function so depth test passes when values are equal to depth buffer's content
+		//m_skyboxShader.UseProgram();
+		//view = glm::mat4(glm::mat3(Engine::Camera::GetInstance()->ViewMatrix())); // remove translation from the view matrix
+		//m_skyboxShader.SetUniform<glm::mat4>("u_view", view);
+		//m_skyboxShader.SetUniform<glm::mat4>("u_projection", projection);
+		//m_skybox->Render();
+		//glDepthFunc(GL_LESS); // set depth function back to default
 		m_water->UnbindCurrentFrameBuffer();
 
 		/* 
 		* RENDER TERRAIN TO THE MAIN FRAMEBUFFER
 		*/
-		Engine::Camera::MirrorY(); // Reset camera position
 		glDisable(GL_CLIP_DISTANCE0);
+
 		m_terrainShader.UseProgram();
-		m_terrainShader.SetUniform<glm::mat4>("u_view", view); // Use the original view matrix
+		m_terrain->BindTextures(m_terrainShader);
+		m_terrainShader.SetUniform<glm::mat4>("u_projection", projection);
+		m_terrainShader.SetUniform<glm::mat4>("u_model", model);
+		m_terrainShader.SetUniform<glm::mat4>("u_view", reflectedView); // Use the original view matrix
 		m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", glm::vec4(0.0f, 1.0f, 0.0f, 10000.0f));
 
 		m_terrain->Render(m_terrainShader);
 
-		/*
-		* RENDER WATER
-		*/
 		m_waterShader.UseProgram();
 		m_waterShader.SetUniform<glm::mat4>("u_projection", projection);
-		m_waterShader.SetUniform<glm::mat4>("u_view", view);
+		m_waterShader.SetUniform<glm::mat4>("u_view", reflectedView);
 		m_waterShader.SetUniform<glm::mat4>("u_model", model);
+
 		// Bind the reflection texture to texture unit 0
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_water->ReflectionTexture());
@@ -126,15 +146,26 @@ namespace Application
 		glBindTexture(GL_TEXTURE_2D, m_water->RefractionTexture());
 		m_waterShader.SetUniform<int>("u_refractionTexture", 1); // Pass texture unit 1 to the shader
 
+		// Bind DUDV map
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, m_water->DudvMap());
+		m_waterShader.SetUniform<int>("u_dudvMap", 2); // Pass texture unit 1 to the shader
+
+		m_waveFactor += m_waveSpeed * ImGui::GetIO().Framerate;
+		m_waveFactor = std::fmod(m_waveFactor, 1.0f);
+		m_waterShader.SetUniform<float>("u_waveFactor", m_waveFactor);
+		m_waterShader.SetUniform<float>("u_waveStrength", m_waterWaveLength);
+
 		m_water->Render(m_waterShader);
 
-		// draw skybox as last
-		glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+		glDepthFunc(GL_LEQUAL);   // change depth function so depth test passes when values are equal to depth buffer's content
 		m_skyboxShader.UseProgram();
 		view = glm::mat4(glm::mat3(Engine::Camera::GetInstance()->ViewMatrix())); // remove translation from the view matrix
-		m_skyboxShader.SetUniform("view", view);
-		m_skyboxShader.SetUniform("projection", projection);
+		m_skyboxShader.SetUniform<glm::mat4>("u_view", view);
+		m_skyboxShader.SetUniform<glm::mat4>("u_projection", projection);
 		m_skybox->Render();
+		glDepthFunc(GL_LESS); // set depth function back to default
+
 
 		/*
 		* Update Camera height
@@ -161,6 +192,9 @@ namespace Application
 		ImGui::DragFloat(" ", &m_cameraAltitude, 1.0f, 0.0f, 500.0f);
 		ImGui::Text("Reflection Clipping plane position :");
 		ImGui::DragFloat4(" ", &m_clipPlane[0], 1.0f, -500.0f, 500.0f);
+		ImGui::Text("Water properties :");
+		ImGui::DragFloat("wave length", &m_waterWaveLength, 0.001f, 0.0f, 50.0f);
+		ImGui::DragFloat("wave speed", &m_waveSpeed, 0.005f, 0.0f, 50.0f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();

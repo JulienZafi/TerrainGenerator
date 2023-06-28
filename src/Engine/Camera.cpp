@@ -40,11 +40,6 @@ namespace Engine
 		return camera_;
 	}
 
-	void Camera::MirrorY() noexcept
-	{
-		position_.y *= -1;
-	}
-
 	void Camera::Move(glm::vec3 const &position) noexcept
 	{
 		position_ += position;
@@ -52,7 +47,17 @@ namespace Engine
 
 	void Camera::InvertPitch() noexcept
 	{
-		pitch_ = pitch_;
+		pitch_ = -pitch_;
+
+		// Update vectors
+		glm::vec3 front{};
+		front.x = cos(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+		front.y = sin(glm::radians(pitch_));
+		front.z = sin(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+		frontDirection_ = glm::normalize(front);
+
+		rightDirection_ = glm::normalize(glm::cross(frontDirection_, worldUp_));
+		upDirection_ = glm::normalize(glm::cross(rightDirection_, frontDirection_));
 	}
 
 	void Camera::ProcessKeyboard(MOTION const motion, float const& deltaTime) noexcept
