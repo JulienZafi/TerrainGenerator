@@ -64,9 +64,6 @@ namespace Application
 
 		// RENDER TO REFLECTION FRAMEBUFFER
 		m_water->BindReflectionFrameBuffer();
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		float cameraDistance{ 2 * (Engine::Camera::GetInstance()->Position().y) };
 		Engine::Camera::Move(glm::vec3(0.0f, -cameraDistance, 0.0f));
@@ -97,24 +94,27 @@ namespace Application
 		Engine::Camera::InvertPitch();
 		reflectedView = Engine::Camera::GetInstance()->ViewMatrix(); // Recalculate the view matrix
 
-		//m_water->BindRefractionFrameBuffer();
-		//m_terrainShader.UseProgram();
-		//m_terrain->BindTextures(m_terrainShader);
-		//m_terrainShader.SetUniform<glm::mat4>("u_projection", projection);
-		//m_terrainShader.SetUniform<glm::mat4>("u_model", model);
-		//m_terrainShader.SetUniform<glm::mat4>("u_view", reflectedView);
-		//m_clipPlane.y *= -1;
-		//m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", m_clipPlane);
+		m_water->BindRefractionFrameBuffer();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//m_terrain->Render(m_terrainShader);
+		m_terrainShader.UseProgram();
+		m_terrain->BindTextures(m_terrainShader);
+		m_terrainShader.SetUniform<glm::mat4>("u_projection", projection);
+		m_terrainShader.SetUniform<glm::mat4>("u_model", model);
+		m_terrainShader.SetUniform<glm::mat4>("u_view", reflectedView);
+		glm::vec4 refractionClipPlane{ m_clipPlane };
+		refractionClipPlane.y *= -1;
+		m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", refractionClipPlane);
 
-		//glDepthFunc(GL_LEQUAL);   // change depth function so depth test passes when values are equal to depth buffer's content
-		//m_skyboxShader.UseProgram();
-		//view = glm::mat4(glm::mat3(Engine::Camera::GetInstance()->ViewMatrix())); // remove translation from the view matrix
-		//m_skyboxShader.SetUniform<glm::mat4>("u_view", view);
-		//m_skyboxShader.SetUniform<glm::mat4>("u_projection", projection);
-		//m_skybox->Render();
-		//glDepthFunc(GL_LESS); // set depth function back to default
+		m_terrain->Render(m_terrainShader);
+
+		glDepthFunc(GL_LEQUAL);   // change depth function so depth test passes when values are equal to depth buffer's content
+		m_skyboxShader.UseProgram();
+		view = glm::mat4(glm::mat3(Engine::Camera::GetInstance()->ViewMatrix())); // remove translation from the view matrix
+		m_skyboxShader.SetUniform<glm::mat4>("u_view", view);
+		m_skyboxShader.SetUniform<glm::mat4>("u_projection", projection);
+		m_skybox->Render();
+		glDepthFunc(GL_LESS); // set depth function back to default
 		m_water->UnbindCurrentFrameBuffer();
 
 		/* 
