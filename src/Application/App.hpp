@@ -51,5 +51,6 @@ namespace Application
 		float m_waterWaveLength;
 		float m_waveFactor;
 		float m_waveSpeed;
+		float m_reflectiveFactor;
 	};
 }

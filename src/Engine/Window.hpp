@@ -67,6 +67,7 @@ namespace Engine
 		[[nodiscard]] inline const unsigned int Width() const noexcept { return width; }
 		[[nodiscard]] inline const unsigned int Height() const noexcept { return height; }
 		[[nodiscard]] inline const GLFWwindow* GetInstance() const noexcept { return m_window; }
+		[[nodiscard]] inline const float DeltaTime() const noexcept { return deltaTime; }
 
 	private:
 		static unsigned int width;
