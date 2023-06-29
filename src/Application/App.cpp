@@ -28,6 +28,7 @@ namespace Application
 		m_waterWaveLength = 0.01f;
 		m_waveSpeed = 0.03f;
 		m_waveFactor = 0.0f;
+		m_reflectiveFactor = 0.5f;
 
 		m_water = std::make_unique <Engine::Water>(m_xpos, m_zpos, 500, 500);
 		m_waterShader = Engine::Shader(WATER_VSHADER_PATH, WATER_FSHADER_PATH);
@@ -135,6 +136,8 @@ namespace Application
 		m_waterShader.SetUniform<glm::mat4>("u_projection", projection);
 		m_waterShader.SetUniform<glm::mat4>("u_view", reflectedView);
 		m_waterShader.SetUniform<glm::mat4>("u_model", model);
+		m_waterShader.SetUniform<glm::vec3>("u_cameraPosition", Engine::Camera::GetInstance()->Position());
+		m_waterShader.SetUniform<float>("u_reflectionFactor", m_reflectiveFactor);
 
 		// Bind the reflection texture to texture unit 0
 		glActiveTexture(GL_TEXTURE0);
@@ -151,8 +154,11 @@ namespace Application
 		glBindTexture(GL_TEXTURE_2D, m_water->DudvMap());
 		m_waterShader.SetUniform<int>("u_dudvMap", 2); // Pass texture unit 1 to the shader
 
-		m_waveFactor += m_waveSpeed * ImGui::GetIO().Framerate;
-		m_waveFactor = std::fmod(m_waveFactor, 1.0f);
+		m_waveFactor += m_waveSpeed * window->DeltaTime();
+		if (m_waveFactor > 1.0f)
+		{
+			m_waveFactor = 0.001f;
+		}
 		m_waterShader.SetUniform<float>("u_waveFactor", m_waveFactor);
 		m_waterShader.SetUniform<float>("u_waveStrength", m_waterWaveLength);
 
@@ -195,6 +201,7 @@ namespace Application
 		ImGui::Text("Water properties :");
 		ImGui::DragFloat("wave length", &m_waterWaveLength, 0.001f, 0.0f, 50.0f);
 		ImGui::DragFloat("wave speed", &m_waveSpeed, 0.005f, 0.0f, 50.0f);
+		ImGui::DragFloat("reflective factor", &m_reflectiveFactor, 0.1f, 0.1f, 50.0f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
