@@ -52,5 +52,7 @@ namespace Application
 		float m_waveFactor;
 		float m_waveSpeed;
 		float m_reflectiveFactor;
+		glm::vec3 m_lightColour;
+		glm::vec3 m_lightPosition;
 	};
 }

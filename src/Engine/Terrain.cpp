@@ -36,9 +36,9 @@ namespace Engine
 		UpdatePlayerPosition(initialX, initialZ);
 
 		LoadTexture(TEXTURES_PATH + "grass.jpg", TextureType::GRASS);
-		LoadTexture(TEXTURES_PATH + "darkstone.jpg", TextureType::ROCK);
+		LoadTexture(TEXTURES_PATH + "rock.jpg", TextureType::ROCK);
 		LoadTexture(TEXTURES_PATH + "sand.jpg", TextureType::SAND);
-		LoadTexture(TEXTURES_PATH + "snow.png", TextureType::SNOW);
+		 LoadTexture(TEXTURES_PATH + "snow.png", TextureType::SNOW);
 	}
 
 	unsigned int Terrain::LoadTextureFromFile(std::string const& path) const noexcept

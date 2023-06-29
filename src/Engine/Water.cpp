@@ -7,19 +7,22 @@
 
 namespace Engine
 {
-	Water::Water(float const xPos, float const& zpos, unsigned int const width, unsigned int const height) noexcept
+	Water::Water(float const xpos, float const& zpos, unsigned int const width, unsigned int const height) noexcept
 	{
+		m_xpos = xpos;
+		m_zpos = zpos;
 		m_width = width;
 		m_height = height;
 
 	std::vector<Vertex> vertices(m_width * m_height);
-
-	for (unsigned int z = 0; z < m_height; ++z)
+	int initialx = (int)round(m_xpos - (float)m_width / 2.0f) + OFFSET_POS;
+	int initialz = (int)round(m_zpos - (float)m_height / 2.0f) + OFFSET_POS;
+	for (int z = 0; z < m_height; ++z)
 	{
-		for (unsigned int x = 0; x < m_width; ++x)
+		for (int x = 0; x < m_width; ++x)
 		{
 			Vertex& vertex = vertices[z * m_width + x];
-			vertex.position = {xPos + x, 0, zpos + z};
+			vertex.position = { initialx + x, 0, initialz + z};
 			vertex.textureCoords = {static_cast<float>(x) / (m_width - 1), static_cast<float>(z) / (m_height - 1)};
 		}
 	}
@@ -54,6 +57,60 @@ namespace Engine
 		InitFrameBuffers();
 
 		m_dudvMap = LoadTextureFromFile(DUDV_FILE);
+		m_normalMap = LoadTextureFromFile(NORMAL_FILE);
+	}
+
+	void Water::UpdateMesh(glm::vec3 const &camPosition) noexcept
+	{
+		float dx{ camPosition.x - m_xpos };
+		float dz{ camPosition.z - m_zpos };
+
+		if (dx * dz > 250.0f)
+		{
+			std::vector<Vertex> vertices(m_width * m_height);
+			int initialx = (int)round(camPosition.x - (float)m_width / 2.0f) + OFFSET_POS;
+			int initialz = (int)round(camPosition.z - (float)m_height / 2.0f) + OFFSET_POS;
+			for (int z = 0; z < m_height; ++z)
+			{
+				for (int x = 0; x < m_width; ++x)
+				{
+					Vertex& vertex = vertices[z * m_width + x];
+					vertex.position = { initialx + x, 0, initialz + z };
+					vertex.textureCoords = { static_cast<float>(x) / (m_width - 1), static_cast<float>(z) / (m_height - 1) };
+				}
+			}
+
+			std::vector<unsigned int> indices(6 * (m_width - 1) * (m_height - 1));
+
+			for (unsigned int z = 0; z < m_height - 1; ++z)
+			{
+				for (unsigned int x = 0; x < m_width - 1; ++x)
+				{
+					unsigned int index = 6 * (z * (m_width - 1) + x);
+
+					unsigned int topLeft = (z * m_width) + x;
+					unsigned int topRight = topLeft + 1;
+					unsigned int bottomLeft = ((z + 1) * m_width) + x;
+					unsigned int bottomRight = bottomLeft + 1;
+
+					// Triangle 1
+					indices[index] = topLeft;
+					indices[index + 1] = bottomLeft;
+					indices[index + 2] = topRight;
+
+					// Triangle 2
+					indices[index + 3] = topRight;
+					indices[index + 4] = bottomLeft;
+					indices[index + 5] = bottomRight;
+				}
+			}
+
+			m_mesh = std::make_unique <Mesh>(vertices, indices);
+
+			m_xpos = camPosition.x;
+			m_zpos = camPosition.z;
+		}
+		else{}
 	}
 
 	void Water::InitFrameBuffers() noexcept

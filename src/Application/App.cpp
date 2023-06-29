@@ -19,18 +19,20 @@ namespace Application
 		m_terrain->BindTextures(m_terrainShader);
 
 		m_clearColor = { 0.1f, 0.1f, 0.1f };
-		m_clipPlane = { 0.0f, 1.0f, 0.0f, 0.0f };
+		m_clipPlane = { 0.0f, 1.0f, 0.0f, -0.001f };
 		m_cameraAltitude = 50.0f;
 		m_zNear = 0.1f;
 		m_zFar = 100000.0f;
 		m_xpos = Engine::Camera::GetInstance()->Position().x;
 		m_zpos = Engine::Camera::GetInstance()->Position().z;
-		m_waterWaveLength = 0.01f;
+		m_waterWaveLength = 0.04f;
 		m_waveSpeed = 0.03f;
 		m_waveFactor = 0.0f;
 		m_reflectiveFactor = 0.5f;
+		m_lightColour = {0.1f, 0.1f, 0.1f};
+		m_lightPosition = { 1.0f, 100000.0f, 1.0f};
 
-		m_water = std::make_unique <Engine::Water>(m_xpos, m_zpos, 500, 500);
+		m_water = std::make_unique <Engine::Water>(m_xpos, m_zpos, 2 * m_terrain->Width() + 50, 2 * m_terrain->Height() + 50);
 		m_waterShader = Engine::Shader(WATER_VSHADER_PATH, WATER_FSHADER_PATH);
 
 		m_skyboxShader = Engine::Shader(SKYBOX_VSHADER_PATH, SKYBOX_FSHADER_PATH);
@@ -52,6 +54,7 @@ namespace Application
 		m_xpos = Engine::Camera::GetInstance()->Position().x;
 		m_zpos = Engine::Camera::GetInstance()->Position().z;
 		m_terrain->UpdatePlayerPosition(m_xpos, m_zpos);
+		m_water->UpdateMesh(Engine::Camera::GetInstance()->Position());
 
 		/*
 		* transformation matrix
@@ -122,6 +125,7 @@ namespace Application
 		* RENDER TERRAIN TO THE MAIN FRAMEBUFFER
 		*/
 		glDisable(GL_CLIP_DISTANCE0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_terrainShader.UseProgram();
 		m_terrain->BindTextures(m_terrainShader);
@@ -154,6 +158,14 @@ namespace Application
 		glBindTexture(GL_TEXTURE_2D, m_water->DudvMap());
 		m_waterShader.SetUniform<int>("u_dudvMap", 2); // Pass texture unit 1 to the shader
 
+		// Bind normal map
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, m_water->NormalMap());
+		m_waterShader.SetUniform<int>("u_normalMap", 3); // Pass texture unit 1 to the shader		
+
+		m_waterShader.SetUniform<glm::vec3>("u_lightColour", m_lightColour);
+		m_waterShader.SetUniform<glm::vec3>("u_lightPosition", m_lightPosition);
+
 		m_waveFactor += m_waveSpeed * window->DeltaTime();
 		if (m_waveFactor > 1.0f)
 		{
@@ -162,7 +174,11 @@ namespace Application
 		m_waterShader.SetUniform<float>("u_waveFactor", m_waveFactor);
 		m_waterShader.SetUniform<float>("u_waveStrength", m_waterWaveLength);
 
+		// Soft Edges
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		m_water->Render(m_waterShader);
+		//glDisable(GL_BLEND);
 
 		glDepthFunc(GL_LEQUAL);   // change depth function so depth test passes when values are equal to depth buffer's content
 		m_skyboxShader.UseProgram();
@@ -202,6 +218,9 @@ namespace Application
 		ImGui::DragFloat("wave length", &m_waterWaveLength, 0.001f, 0.0f, 50.0f);
 		ImGui::DragFloat("wave speed", &m_waveSpeed, 0.005f, 0.0f, 50.0f);
 		ImGui::DragFloat("reflective factor", &m_reflectiveFactor, 0.1f, 0.1f, 50.0f);
+		ImGui::Text("Light properties :");
+		ImGui::DragFloat3("light position", &m_lightPosition[0], 0.0f, 0.0f, 100000.0f);
+		ImGui::DragFloat3("light colour", &m_lightColour[0], 0.0f, 0.6f, 0.0f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();

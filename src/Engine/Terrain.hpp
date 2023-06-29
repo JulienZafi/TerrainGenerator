@@ -11,7 +11,7 @@
 
 constexpr std::string const TEXTURES_PATH{ "textures//" };
 
-#define NUM_CHUNCKS_TO_DISPLAY	3
+#define NUM_CHUNCKS_TO_DISPLAY	6
 #define CHUNK_WIDTH				50
 #define CHUNK_HEIGHT			50
 
