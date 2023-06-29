@@ -12,7 +12,6 @@ namespace Engine
 	{
         Bind();
 
-        stbi_set_flip_vertically_on_load(false);
         LoadTextures();
 	}
     

@@ -5,12 +5,15 @@
 #include <string_view>
 
 constexpr std::string_view const DUDV_FILE{ "textures//water_dudv.png" };
+constexpr std::string_view const NORMAL_FILE{ "textures//water_normalmap.png" };
 
 #define REFLECTION_WIDTH 1920
 #define REFLECTION_HEIGHT 1080
 
 #define REFRACTION_WIDTH 1920
 #define REFRACTION_HEIGHT 1080
+
+#define OFFSET_POS 25
 
 namespace Engine
 {
@@ -29,6 +32,8 @@ namespace Engine
 		unsigned int CreateDepthBuffer(unsigned int const width, unsigned int const height) noexcept;
 		unsigned int CreateRenderBufferAttachment(int width, int height) noexcept;
 
+		void UpdateMesh(glm::vec3 const &camPosition) noexcept;
+
 		void BindFrameBuffer(unsigned int const frameBuffer, unsigned int const width, unsigned int const height) const noexcept;
 
 		void BindReflectionFrameBuffer() const noexcept;
@@ -40,6 +45,7 @@ namespace Engine
 		[[nodiscard]] inline const unsigned int RefractionTexture() const noexcept { return m_refractionTexture; }
 		[[nodiscard]] inline const unsigned int RefractionDepthTexture() const noexcept { return m_refractionDepthTexture; }
 		[[nodiscard]] inline const unsigned int DudvMap() const noexcept { return m_dudvMap; }
+		[[nodiscard]] inline const unsigned int NormalMap() const noexcept { return m_normalMap; }
 
 		void UnbindCurrentFrameBuffer() const noexcept;
 
@@ -47,6 +53,9 @@ namespace Engine
 
 	private:
 		std::unique_ptr <Mesh> m_mesh;
+	
+		float m_xpos;
+		float m_zpos;
 
 		unsigned int m_width;
 		unsigned int m_height;
@@ -60,5 +69,6 @@ namespace Engine
 		unsigned int m_refractionDepthTexture;
 
 		unsigned int m_dudvMap;
+		unsigned int m_normalMap;
 	};
 };
