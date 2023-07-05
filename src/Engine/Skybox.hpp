@@ -61,6 +61,8 @@ constexpr float const skyboxVertices[]
 
 namespace Engine
 {
+    class Shader;
+
 	class Skybox
 	{
 	public:
@@ -70,7 +72,7 @@ namespace Engine
         void Bind() noexcept;
 		void LoadTextures() noexcept;
 
-        void Render() const noexcept;
+        void Render(Shader const& shader, glm::mat4 const& projection, glm::mat4 const& view) const noexcept;
 
 	private:
 		unsigned int m_textureID;

@@ -1,6 +1,9 @@
+#include "Camera.hpp"
 #include "Mesh.hpp"
 #include "Water.hpp"
 
+#include <GLFW/glfw3.h>
+#include <imgui/imgui.h>
 #include <stb_image.h>
 
 #include <iostream>
@@ -13,6 +16,13 @@ namespace Engine
 		m_zpos = zpos;
 		m_width = width;
 		m_height = height;
+
+		m_waveLevel = 0.1f;
+		m_waveSpeed = 0.25f;
+		m_moveFactor = m_waveSpeed * glfwGetTime();
+		m_distanceFactor = 0.05f;
+		m_grain = 50.0f;
+		m_specularFactor = 1.5f;
 
 		std::vector<Vertex> vertices(m_width * m_height);
 		int initialx = (int)round(m_xpos - (float)m_width / 2.0f) + OFFSET_POS;
@@ -151,7 +161,7 @@ namespace Engine
 	{
 		m_reflectionFrameBuffer = CreateFrameBuffer();
 		m_reflectionTexture = CreateTexture(REFLECTION_WIDTH, REFLECTION_HEIGHT);
-		m_reflectionDepthBuffer = CreateDepthBuffer(REFLECTION_WIDTH, REFLECTION_HEIGHT);
+		m_reflectionDepthBuffer = CreateDepthTexture(REFLECTION_WIDTH, REFLECTION_HEIGHT);
 		UnbindCurrentFrameBuffer();
 		m_refractionFrameBuffer = CreateFrameBuffer();
 		m_refractionTexture = CreateTexture(REFRACTION_WIDTH, REFRACTION_HEIGHT);
@@ -171,14 +181,16 @@ namespace Engine
 
 	unsigned int Water::CreateTexture(unsigned int const width, unsigned int const height) noexcept
 	{
-		unsigned int texture{};
+		unsigned int texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 
@@ -196,27 +208,6 @@ namespace Engine
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture, 0);
 
 		return texture;
-	}
-
-	unsigned int Water::CreateDepthBuffer(unsigned int const width, unsigned int const height) noexcept
-	{
-		unsigned int depthBuffer;
-		glGenRenderbuffers(1, &depthBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
-		return depthBuffer;
-	}
-
-	unsigned int Water::CreateRenderBufferAttachment(int width, int height) noexcept
-	{
-		unsigned int rbo;
-		glGenRenderbuffers(1, &rbo);
-		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height); // use a single renderbuffer object for both a depth AND stencil buffer.
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-
-		return rbo;
 	}
 
 	void Water::BindFrameBuffer(unsigned int const frameBuffer, unsigned int const width, unsigned int const height) const noexcept
@@ -285,11 +276,69 @@ namespace Engine
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void Water::Render(Shader const& terrainShader) const noexcept
+	void Water::SetLightProperties(glm::vec3 const& lightPosition, glm::vec3 const& lightColor) noexcept
 	{
+		m_lightPosition = lightPosition;
+		m_lightColor = lightColor;
+	}
+
+	void Water::Render(Shader const& shader, glm::mat4 const& projection, glm::mat4 const& view, glm::mat4 const& model) const noexcept
+	{
+		shader.UseProgram();
+		shader.SetUniform("u_projection", projection);
+		shader.SetUniform("u_view", view);
+		shader.SetUniform("u_model", model);
+
+		shader.SetUniform("u_cameraPosition", Camera::GetInstance()->Position());
+		shader.SetUniform("u_lightColor", m_lightColor);
+		shader.SetUniform("u_lightPosition", m_lightPosition);
+
+		shader.SetUniform("u_waveLevel", m_waveLevel);
+		shader.SetUniform("u_moveFactor", m_moveFactor);
+		shader.SetUniform("u_distanceFactor", m_distanceFactor);
+		shader.SetUniform("u_grain", m_grain);
+		shader.SetUniform("u_specularFactor", m_specularFactor);
+
+		// Bind the reflection texture to texture unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_reflectionTexture);
+		shader.SetUniform("u_reflectionTexture", 0); // Pass texture unit 0 to the shader
+
+		// Bind the refraction texture to texture unit 1
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, m_refractionTexture);
+		shader.SetUniform("u_refractionTexture", 1); // Pass texture unit 1 to the shader
+
+		// Bind DUDV map
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, m_dudvMap);
+		shader.SetUniform("u_dudvMap", 2); // Pass texture unit 1 to the shader
+
+		// Bind normal map
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, m_normalMap);
+		shader.SetUniform("u_normalMap", 3); // Pass texture unit 1 to the shader		
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		glBindVertexArray(m_mesh->VAO());
 		glDrawElements(GL_TRIANGLES, std::size(m_mesh->Indices()), GL_UNSIGNED_INT, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
+
+		glDisable(GL_BLEND);
+	}
+
+	void Water::ShowGUI() noexcept
+	{
+		ImGui::Begin("Water settings : ");
+		ImGui::DragFloat("wave level", &m_waveLevel, 0.001f, 0.0f, 50.0f);
+		ImGui::DragFloat("wave speed", &m_waveSpeed, 0.005f, 0.0f, 50.0f);
+		ImGui::DragFloat("move factor", &m_moveFactor, 0.005f, 0.0f, 50.0f);
+		ImGui::DragFloat("distance factor", &m_distanceFactor, 0.005f, 0.0f, 50.0f);
+		ImGui::DragFloat("grain", &m_grain, 0.1f, 0.0f, 100.0f);
+		ImGui::DragFloat("specular factor", &m_specularFactor, 0.1f, 0.0f, 50.0f);
+		ImGui::End();
 	}
 };
