@@ -25,12 +25,14 @@ namespace Application
 		m_zFar = 100000.0f;
 		m_xpos = Engine::Camera::GetInstance()->Position().x;
 		m_zpos = Engine::Camera::GetInstance()->Position().z;
+		m_waterColor = {0.1f, 0.3f, 0.8f};
 		m_waterWaveLength = 0.04f;
 		m_waveSpeed = 0.03f;
 		m_waveFactor = 0.0f;
 		m_reflectiveFactor = 0.5f;
-		m_lightColour = {0.1f, 0.1f, 0.1f};
+		m_lightColour = {0.7f, 0.7f, 0.7f};
 		m_lightPosition = { 1.0f, 100000.0f, 1.0f};
+		m_lightDirection = { -0.2f, -1.0f, -0.3f };
 
 		m_water = std::make_unique <Engine::Water>(m_xpos, m_zpos, 2 * m_terrain->Width() + 50, 2 * m_terrain->Height() + 50);
 		m_waterShader = Engine::Shader(WATER_VSHADER_PATH, WATER_FSHADER_PATH);
@@ -80,6 +82,8 @@ namespace Application
 		m_terrainShader.SetUniform<glm::mat4>("u_model", model);
 		m_terrainShader.SetUniform<glm::mat4>("u_view", reflectedView);
 		m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", m_clipPlane);
+		m_terrainShader.SetUniform<glm::vec3>("u_light.direction", m_lightDirection);
+		m_terrainShader.SetUniform<glm::vec3>("u_light.color", m_lightColour);
 
 		m_terrain->Render(m_terrainShader);
 
@@ -90,6 +94,7 @@ namespace Application
 		m_skyboxShader.SetUniform<glm::mat4>("u_projection", projection);
 		m_skybox->Render();
 		glDepthFunc(GL_LESS); // set depth function back to default
+		m_water->UnbindCurrentFrameBuffer();
 		
 		/*
 		* RENDER TERRAIN TO REFRACTION BUFFER
@@ -109,6 +114,8 @@ namespace Application
 		glm::vec4 refractionClipPlane{ m_clipPlane };
 		refractionClipPlane.y *= -1;
 		m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", refractionClipPlane);
+		m_terrainShader.SetUniform<glm::vec3>("u_light.direction", m_lightDirection);
+		m_terrainShader.SetUniform<glm::vec3>("u_light.color", m_lightColour);
 
 		m_terrain->Render(m_terrainShader);
 
@@ -133,9 +140,12 @@ namespace Application
 		m_terrainShader.SetUniform<glm::mat4>("u_model", model);
 		m_terrainShader.SetUniform<glm::mat4>("u_view", reflectedView); // Use the original view matrix
 		m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", glm::vec4(0.0f, 1.0f, 0.0f, 10000.0f));
+		m_terrainShader.SetUniform<glm::vec3>("u_light.direction", m_lightDirection);
+		m_terrainShader.SetUniform<glm::vec3>("u_light.color", m_lightColour);
 
 		m_terrain->Render(m_terrainShader);
 
+		glEnable(GL_BLEND);
 		m_waterShader.UseProgram();
 		m_waterShader.SetUniform<glm::mat4>("u_projection", projection);
 		m_waterShader.SetUniform<glm::mat4>("u_view", reflectedView);
@@ -171,14 +181,13 @@ namespace Application
 		{
 			m_waveFactor = 0.001f;
 		}
+		m_waterShader.SetUniform<glm::vec3>("u_waterColour", m_waterColor);
 		m_waterShader.SetUniform<float>("u_waveFactor", m_waveFactor);
 		m_waterShader.SetUniform<float>("u_waveStrength", m_waterWaveLength);
 
 		// Soft Edges
-		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		m_water->Render(m_waterShader);
-		//glDisable(GL_BLEND);
+		glDisable(GL_BLEND);
 
 		glDepthFunc(GL_LEQUAL);   // change depth function so depth test passes when values are equal to depth buffer's content
 		m_skyboxShader.UseProgram();
@@ -215,12 +224,13 @@ namespace Application
 		ImGui::Text("Reflection Clipping plane position :");
 		ImGui::DragFloat4(" ", &m_clipPlane[0], 1.0f, -500.0f, 500.0f);
 		ImGui::Text("Water properties :");
+		ImGui::DragFloat3("Water color", &m_waterColor[0], 0.0f, 0.0f, 100000.0f);
 		ImGui::DragFloat("wave length", &m_waterWaveLength, 0.001f, 0.0f, 50.0f);
 		ImGui::DragFloat("wave speed", &m_waveSpeed, 0.005f, 0.0f, 50.0f);
 		ImGui::DragFloat("reflective factor", &m_reflectiveFactor, 0.1f, 0.1f, 50.0f);
 		ImGui::Text("Light properties :");
 		ImGui::DragFloat3("light position", &m_lightPosition[0], 0.0f, 0.0f, 100000.0f);
-		ImGui::DragFloat3("light colour", &m_lightColour[0], 0.0f, 0.6f, 0.0f);
+		ImGui::DragFloat3("light colour", &m_lightColour[0], 0.0f, 0.0f, 1.0f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();

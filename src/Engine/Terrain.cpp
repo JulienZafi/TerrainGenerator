@@ -38,7 +38,6 @@ namespace Engine
 		LoadTexture(TEXTURES_PATH + "grass.jpg", TextureType::GRASS);
 		LoadTexture(TEXTURES_PATH + "rock.jpg", TextureType::ROCK);
 		LoadTexture(TEXTURES_PATH + "sand.jpg", TextureType::SAND);
-		 LoadTexture(TEXTURES_PATH + "snow.png", TextureType::SNOW);
 	}
 
 	unsigned int Terrain::LoadTextureFromFile(std::string const& path) const noexcept
@@ -68,10 +67,8 @@ namespace Engine
 			glBindTexture(GL_TEXTURE_2D, textureID);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(textureID);
@@ -111,9 +108,6 @@ namespace Engine
 				break;
 			case TextureType::SAND:
 				shader.SetUniform("u_textureSand", textureUnit);
-				break;
-			case TextureType::SNOW:
-				shader.SetUniform("u_textureSnow", textureUnit);
 				break;
 			case TextureType::WATER:
 				shader.SetUniform("u_textureWater", textureUnit);
@@ -182,6 +176,40 @@ namespace Engine
 				indices.push_back(bottomLeft);
 				indices.push_back(bottomRight);
 			}
+		}
+
+		for (unsigned int i{ 0 }; i < m_chunkHeight; ++i)
+		{
+			for (unsigned int j{ 0 }; j < m_chunkWidth; ++j)
+			{
+				unsigned int topLeft = i * (m_chunkWidth + 1) + j;
+				unsigned int topRight = topLeft + 1;
+				unsigned int bottomLeft = (i + 1) * (m_chunkWidth + 1) + j;
+				unsigned int bottomRight = bottomLeft + 1;
+
+				glm::vec3 v0 = vertices[topLeft].position;
+				glm::vec3 v1 = vertices[bottomLeft].position;
+				glm::vec3 v2 = vertices[topRight].position;
+				glm::vec3 faceNormal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+
+				vertices[topLeft].normal += faceNormal;
+				vertices[bottomLeft].normal += faceNormal;
+				vertices[topRight].normal += faceNormal;
+
+				v0 = vertices[topRight].position;
+				v1 = vertices[bottomLeft].position;
+				v2 = vertices[bottomRight].position;
+				faceNormal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
+
+				vertices[topRight].normal += faceNormal;
+				vertices[bottomLeft].normal += faceNormal;
+				vertices[bottomRight].normal += faceNormal;
+			}
+		}
+
+		for (auto& vertex : vertices)
+		{
+			vertex.normal = glm::normalize(vertex.normal);
 		}
 
 		return std::make_unique <Mesh>(vertices, indices);
