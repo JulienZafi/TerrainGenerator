@@ -293,8 +293,17 @@ namespace Engine
 		Update(x, z);
 	}
 
-	void Terrain::Render(Shader const& terrainShader) const noexcept
+	void Terrain::Render(Shader const& shader, glm::mat4 const& projection, glm::mat4 const& view, glm::mat4 const& model) const noexcept
 	{
+		shader.UseProgram();
+		BindTextures(shader);
+		shader.SetUniform("u_projection", projection);
+		shader.SetUniform("u_view", view);
+		shader.SetUniform("u_model", model);
+		shader.SetUniform("u_clipPlane", m_clipPlane);
+		shader.SetUniform("u_light.direction", m_lightDirection);
+		shader.SetUniform("u_light.color", m_lightColor);
+
 		for (const auto& [coord, mesh] : m_meshes)
 		{	
 			glBindVertexArray(mesh->VAO());
@@ -303,6 +312,17 @@ namespace Engine
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
 		}
+	}
+
+	void Terrain::SetLight(glm::vec3 const& lightColor, glm::vec3 const &lightDirection) noexcept
+	{
+		m_lightColor = lightColor;
+		m_lightDirection = lightDirection;
+	}
+
+	void Terrain::SetClipPlane(glm::vec4 const& clipPlane) noexcept
+	{
+		m_clipPlane = clipPlane;
 	}
 
 	void Terrain::ShowGUI() noexcept

@@ -1,3 +1,4 @@
+#include "Shader.hpp"
 #include "Skybox.hpp"
 
 #include <glad/glad.h>
@@ -69,13 +70,21 @@ namespace Engine
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     }
 
-    void Skybox::Render() const noexcept
+    void Skybox::Render(Shader const& shader, glm::mat4 const& projection, glm::mat4 const& view) const noexcept
     {
-        // skybox cube
+        // change depth function so depth test passes when values are equal to depth buffer's content
+        glDepthFunc(GL_LEQUAL);  
+
+        shader.UseProgram();
+        shader.SetUniform("u_view", view);
+        shader.SetUniform("u_projection", projection);
+
         glBindVertexArray(m_VAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
+
+        glDepthFunc(GL_LESS);
     }
 }
