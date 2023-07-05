@@ -30,7 +30,7 @@ namespace Application
 		m_waveSpeed = 0.03f;
 		m_waveFactor = 0.0f;
 		m_reflectiveFactor = 0.5f;
-		m_lightColour = {0.7f, 0.7f, 0.7f};
+		m_lightColor = {0.7f, 0.7f, 0.7f};
 		m_lightPosition = { 1.0f, 100000.0f, 1.0f};
 		m_lightDirection = { -0.2f, -1.0f, -0.3f };
 
@@ -83,7 +83,7 @@ namespace Application
 		m_terrainShader.SetUniform<glm::mat4>("u_view", reflectedView);
 		m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", m_clipPlane);
 		m_terrainShader.SetUniform<glm::vec3>("u_light.direction", m_lightDirection);
-		m_terrainShader.SetUniform<glm::vec3>("u_light.color", m_lightColour);
+		m_terrainShader.SetUniform<glm::vec3>("u_light.color", m_lightColor);
 
 		m_terrain->Render(m_terrainShader);
 
@@ -115,7 +115,7 @@ namespace Application
 		refractionClipPlane.y *= -1;
 		m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", refractionClipPlane);
 		m_terrainShader.SetUniform<glm::vec3>("u_light.direction", m_lightDirection);
-		m_terrainShader.SetUniform<glm::vec3>("u_light.color", m_lightColour);
+		m_terrainShader.SetUniform<glm::vec3>("u_light.color", m_lightColor);
 
 		m_terrain->Render(m_terrainShader);
 
@@ -141,7 +141,7 @@ namespace Application
 		m_terrainShader.SetUniform<glm::mat4>("u_view", reflectedView); // Use the original view matrix
 		m_terrainShader.SetUniform<glm::vec4>("u_clipPlane", glm::vec4(0.0f, 1.0f, 0.0f, 10000.0f));
 		m_terrainShader.SetUniform<glm::vec3>("u_light.direction", m_lightDirection);
-		m_terrainShader.SetUniform<glm::vec3>("u_light.color", m_lightColour);
+		m_terrainShader.SetUniform<glm::vec3>("u_light.color", m_lightColor);
 
 		m_terrain->Render(m_terrainShader);
 
@@ -173,7 +173,7 @@ namespace Application
 		glBindTexture(GL_TEXTURE_2D, m_water->NormalMap());
 		m_waterShader.SetUniform<int>("u_normalMap", 3); // Pass texture unit 1 to the shader		
 
-		m_waterShader.SetUniform<glm::vec3>("u_lightColour", m_lightColour);
+		m_waterShader.SetUniform<glm::vec3>("u_lightColour", m_lightColor);
 		m_waterShader.SetUniform<glm::vec3>("u_lightPosition", m_lightPosition);
 
 		m_waveFactor += m_waveSpeed * window->DeltaTime();
@@ -230,7 +230,7 @@ namespace Application
 		ImGui::DragFloat("reflective factor", &m_reflectiveFactor, 0.1f, 0.1f, 50.0f);
 		ImGui::Text("Light properties :");
 		ImGui::DragFloat3("light position", &m_lightPosition[0], 0.0f, 0.0f, 100000.0f);
-		ImGui::DragFloat3("light colour", &m_lightColour[0], 0.0f, 0.0f, 1.0f);
+		ImGui::DragFloat3("light colour", &m_lightColor[0], 0.0f, 0.0f, 1.0f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
