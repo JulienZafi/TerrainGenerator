@@ -209,7 +209,7 @@ namespace Engine
 			lastYpos = (float)ypos;
 			isFirstMouse = false;
 		}
-		else{}
+		else {}
 
 		float xoffset{ (float)xpos - lastXpos };
 		float yoffset{ lastYpos - (float)ypos };

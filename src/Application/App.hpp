@@ -48,11 +48,13 @@ namespace Application
 		float m_xpos;
 		float m_zpos;
 
+		glm::vec3 m_waterColor;
 		float m_waterWaveLength;
 		float m_waveFactor;
 		float m_waveSpeed;
 		float m_reflectiveFactor;
-		glm::vec3 m_lightColour;
+		glm::vec3 m_lightColor;
 		glm::vec3 m_lightPosition;
+		glm::vec3 m_lightDirection;
 	};
 }

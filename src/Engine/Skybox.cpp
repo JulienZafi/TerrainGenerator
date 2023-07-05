@@ -20,6 +20,8 @@ namespace Engine
         glGenTextures(1, &m_textureID);
         glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 
+        //stbi_set_flip_vertically_on_load(true);
+
         int width{}, height{}, numComponents{};
         for (unsigned int i = 0; i < std::size(cubeMap); i++)
         {
