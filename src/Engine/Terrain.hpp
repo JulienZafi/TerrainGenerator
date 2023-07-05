@@ -52,12 +52,15 @@ namespace Engine
 		void Update(float const& x, float const& z) noexcept;
 		void UpdatePlayerPosition(float const& x, float const& z) noexcept;
 
-		void Render(Shader const& terrainShader) const noexcept;
+		void Render(Shader const& shader, glm::mat4 const& projection, glm::mat4 const& view, glm::mat4 const& model) const noexcept;
 
 		void ShowGUI() noexcept;
 
-		[[nodiscard]] inline const unsigned int Width(){ return (m_numChunksToDisplay * m_chunkWidth); }
-		[[nodiscard]] inline const unsigned int Height(){ return (m_numChunksToDisplay * m_chunkHeight); }
+		[[nodiscard]] inline const unsigned int Width() const noexcept{ return (m_numChunksToDisplay * m_chunkWidth); }
+		[[nodiscard]] inline const unsigned int Height() const noexcept{ return (m_numChunksToDisplay * m_chunkHeight); }
+
+		void SetLight(glm::vec3 const& lightColor, glm::vec3 const& lightDirection) noexcept;
+		void SetClipPlane(glm::vec4 const& clipPlane) noexcept;
 
 	private:
 		std::map <std::pair <int, int>, std::unique_ptr <Mesh>> m_meshes;
@@ -70,5 +73,9 @@ namespace Engine
 		int m_chunkHeight;
 
 		PerlinParams m_perlinParams;
+
+		glm::vec3 m_lightColor;
+		glm::vec3 m_lightDirection;
+		glm::vec4 m_clipPlane;
 	};
 }

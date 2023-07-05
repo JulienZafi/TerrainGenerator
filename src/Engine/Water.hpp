@@ -29,8 +29,6 @@ namespace Engine
 		unsigned int CreateFrameBuffer() noexcept;
 		unsigned int CreateTexture(unsigned int const width, unsigned int const height) noexcept;
 		unsigned int CreateDepthTexture(unsigned int const width, unsigned int const height) noexcept;
-		unsigned int CreateDepthBuffer(unsigned int const width, unsigned int const height) noexcept;
-		unsigned int CreateRenderBufferAttachment(int width, int height) noexcept;
 
 		void UpdateMesh(glm::vec3 const &camPosition) noexcept;
 
@@ -41,15 +39,13 @@ namespace Engine
 
 		unsigned int LoadTextureFromFile(std::string_view const& path) const noexcept;
 
-		[[nodiscard]] inline const unsigned int ReflectionTexture() const noexcept { return m_reflectionTexture; }
-		[[nodiscard]] inline const unsigned int RefractionTexture() const noexcept { return m_refractionTexture; }
-		[[nodiscard]] inline const unsigned int RefractionDepthTexture() const noexcept { return m_refractionDepthTexture; }
-		[[nodiscard]] inline const unsigned int DudvMap() const noexcept { return m_dudvMap; }
-		[[nodiscard]] inline const unsigned int NormalMap() const noexcept { return m_normalMap; }
+		void SetLightProperties(glm::vec3 const& lightPosition, glm::vec3 const& lightColor) noexcept;
 
 		void UnbindCurrentFrameBuffer() const noexcept;
 
-		void Render(Shader const& terrainShader) const noexcept;
+		void Render(Shader const& shader, glm::mat4 const& projection, glm::mat4 const& view, glm::mat4 const& model) const noexcept;
+
+		void ShowGUI() noexcept;
 
 	private:
 		std::unique_ptr <Mesh> m_mesh;
@@ -70,5 +66,15 @@ namespace Engine
 
 		unsigned int m_dudvMap;
 		unsigned int m_normalMap;
+
+		glm::vec3 m_cameraPosition;
+		glm::vec3 m_lightColor;
+		glm::vec3 m_lightPosition;
+		float m_waveLevel;
+		float m_waveSpeed;
+		float m_moveFactor;
+		float m_distanceFactor;
+		float m_grain;
+		float m_specularFactor;
 	};
 };
