@@ -190,7 +190,7 @@ namespace Engine
 	void Window::Wait() const noexcept
 	{
 		glfwSwapBuffers(m_window);
-		glfwWaitEvents();
+		glfwPollEvents();
 	}
 
 	/*
