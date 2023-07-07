@@ -21,6 +21,8 @@ namespace Application
 		m_clearColor = { 0.1f, 0.1f, 0.1f };
 		m_clipPlane = { 0.0f, 1.0f, 0.0f, -0.1f };
 		m_cameraAltitude = 50.0f;
+		m_zFar = 10000;
+		m_zNear = 0.1f;
 
 		m_xpos = Engine::Camera::GetInstance()->Position().x;
 		m_zpos = Engine::Camera::GetInstance()->Position().z;
@@ -37,7 +39,7 @@ namespace Application
 		m_skyboxShader.SetUniform("u_skyboxTexture", 0);
 	}
 
-	void Application::Render(std::unique_ptr <Engine::Window> const& window) noexcept
+	void Application::Render(std::unique_ptr <Engine::Window> const& window)
 	{
 		glClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -75,7 +77,7 @@ namespace Application
 		m_terrain->Render(m_terrainShader, projection, reflectedView, model);
 
 		view = glm::mat4(glm::mat3(Engine::Camera::GetInstance()->ViewMatrix())); // remove translation from the view matrix
-		//m_skybox->Render(m_skyboxShader, projection, view);
+		m_skybox->Render(m_skyboxShader, projection, view);
 
 		m_water->UnbindCurrentFrameBuffer();
 		
@@ -96,7 +98,7 @@ namespace Application
 		m_terrain->Render(m_terrainShader, projection, reflectedView, model);
 
 		view = glm::mat4(glm::mat3(Engine::Camera::GetInstance()->ViewMatrix())); // remove translation from the view matrix
-		//m_skybox->Render(m_skyboxShader, projection, view);
+		m_skybox->Render(m_skyboxShader, projection, view);
 
 		m_water->UnbindCurrentFrameBuffer();
 
@@ -115,7 +117,7 @@ namespace Application
 		m_water->Render(m_waterShader, projection, reflectedView, model);
 
 		view = glm::mat4(glm::mat3(Engine::Camera::GetInstance()->ViewMatrix())); // remove translation from the view matrix
-		//m_skybox->Render(m_skyboxShader, projection, view);
+		m_skybox->Render(m_skyboxShader, projection, view);
 
 		/*
 		* Update Camera height
@@ -143,7 +145,7 @@ namespace Application
 		ImGui::Text("Reflection Clipping plane position :");
 		ImGui::DragFloat4(" ", &m_clipPlane[0], 1.0f, -500.0f, 500.0f);
 		ImGui::Text("Light properties :");
-		ImGui::DragFloat3("light position", &m_lightDirection[0], 0.0f, 0.0f, 100000.0f);
+		ImGui::DragFloat3("light direction", &m_lightDirection[0], 0.0f, 0.0f, 100000.0f);
 		ImGui::DragFloat3("light colour", &m_lightColor[0], 0.0f, 0.0f, 1.0f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);

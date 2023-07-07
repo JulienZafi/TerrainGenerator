@@ -80,9 +80,5 @@ namespace Engine
 		float m_shineDamper;
 		float m_reflectivity;
 		float m_deltaTime;
-
-		float m_zNear;
-		float m_zFar;
-		float m_waterDepthFactor;
 	};
 };
