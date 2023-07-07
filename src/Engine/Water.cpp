@@ -17,12 +17,14 @@ namespace Engine
 		m_width = width;
 		m_height = height;
 
-		m_waveLevel = 0.1f;
-		m_waveSpeed = 0.25f;
-		m_moveFactor = m_waveSpeed * glfwGetTime();
-		m_distanceFactor = 0.05f;
-		m_grain = 50.0f;
-		m_specularFactor = 1.5f;
+		m_waveLevel = 0.03f;
+		m_waveSpeed = 0.05;
+		m_moveFactor = 0.0f;
+		m_tiling = 10.0f;
+		m_waterColor = { 0.0f, 0.3f, 0.5f };
+		m_refractiveFactor = 0.5f;
+		m_shineDamper = 20.0f;
+		m_reflectivity = 0.6f;
 
 		std::vector<Vertex> vertices(m_width * m_height);
 		int initialx = (int)round(m_xpos - (float)m_width / 2.0f) + OFFSET_POS;
@@ -276,14 +278,26 @@ namespace Engine
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void Water::SetLightProperties(glm::vec3 const& lightPosition, glm::vec3 const& lightColor) noexcept
+	void Water::SetLightProperties(glm::vec3 const& lightDirection, glm::vec3 const& lightColor) noexcept
 	{
-		m_lightPosition = lightPosition;
+		m_lightDirection = lightDirection;
 		m_lightColor = lightColor;
 	}
 
-	void Water::Render(Shader const& shader, glm::mat4 const& projection, glm::mat4 const& view, glm::mat4 const& model) const noexcept
+	void Water::SetTime(float const& deltaTime) noexcept
 	{
+		m_deltaTime = deltaTime;
+	}
+
+	void Water::Render(Shader const& shader, glm::mat4 const& projection, glm::mat4 const& view, glm::mat4 const& model) noexcept
+	{
+		m_moveFactor += m_waveSpeed * m_deltaTime;
+
+		if (m_moveFactor > 1.0f)
+		{
+			m_moveFactor = 0.0f;
+		}
+
 		shader.UseProgram();
 		shader.SetUniform("u_projection", projection);
 		shader.SetUniform("u_view", view);
@@ -291,13 +305,15 @@ namespace Engine
 
 		shader.SetUniform("u_cameraPosition", Camera::GetInstance()->Position());
 		shader.SetUniform("u_lightColor", m_lightColor);
-		shader.SetUniform("u_lightPosition", m_lightPosition);
+		shader.SetUniform("u_lightDirection", m_lightDirection);
 
+		shader.SetUniform("u_waterColor", m_waterColor);
 		shader.SetUniform("u_waveLevel", m_waveLevel);
 		shader.SetUniform("u_moveFactor", m_moveFactor);
-		shader.SetUniform("u_distanceFactor", m_distanceFactor);
-		shader.SetUniform("u_grain", m_grain);
-		shader.SetUniform("u_specularFactor", m_specularFactor);
+		shader.SetUniform("u_tiling", m_tiling);
+		shader.SetUniform("u_refractiveFactor", m_refractiveFactor);
+		shader.SetUniform("u_shineDamper", m_shineDamper);
+		shader.SetUniform("u_reflectivity", m_reflectivity);
 
 		// Bind the reflection texture to texture unit 0
 		glActiveTexture(GL_TEXTURE0);
@@ -333,12 +349,14 @@ namespace Engine
 	void Water::ShowGUI() noexcept
 	{
 		ImGui::Begin("Water settings : ");
-		ImGui::DragFloat("wave level", &m_waveLevel, 0.001f, 0.0f, 50.0f);
+		ImGui::DragFloat4("water color", &m_waterColor[0], 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat("wave level", &m_waveLevel, 0.001f, 0.01f, 1.0f);
 		ImGui::DragFloat("wave speed", &m_waveSpeed, 0.005f, 0.0f, 50.0f);
-		ImGui::DragFloat("move factor", &m_moveFactor, 0.005f, 0.0f, 50.0f);
-		ImGui::DragFloat("distance factor", &m_distanceFactor, 0.005f, 0.0f, 50.0f);
-		ImGui::DragFloat("grain", &m_grain, 0.1f, 0.0f, 100.0f);
-		ImGui::DragFloat("specular factor", &m_specularFactor, 0.1f, 0.0f, 50.0f);
+		ImGui::DragFloat("move factor", &m_moveFactor, 0.005f, 0.1f, 1.5f);
+		ImGui::DragFloat("tiling", &m_tiling, 0.1f, 0.1f, 20.0f);
+		ImGui::DragFloat("refractive factor", &m_refractiveFactor, 0.1f, 0.0f, 20.0f);
+		ImGui::DragFloat("shine damper", &m_shineDamper, 0.1f, 0.0f, 50.0f);
+		ImGui::DragFloat("reflectivity", &m_reflectivity, 0.01f, 0.0f, 1.0f);
 		ImGui::End();
 	}
 };

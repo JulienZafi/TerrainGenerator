@@ -8,8 +8,8 @@
 /*
 * WINDOW DEFAULT PROPERTIES
 */
-#define WIDTH	3840
-#define HEIGHT	2160
+#define WIDTH	1920
+#define HEIGHT	1280
 #define TITLE	"3D Terrain Generator"
 
 int main()
