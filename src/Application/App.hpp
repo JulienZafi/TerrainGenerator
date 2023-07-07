@@ -27,7 +27,7 @@ namespace Application
 		Application() noexcept;
 		~Application() = default;
 
-		void Render(std::unique_ptr <Engine::Window> const& window) noexcept;
+		void Render(std::unique_ptr <Engine::Window> const& window);
 
 		void ShowGUI();
 
