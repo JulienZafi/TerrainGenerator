@@ -10,12 +10,14 @@
 
 namespace Engine
 {
-	Water::Water(float const xpos, float const& zpos, unsigned int const width, unsigned int const height) noexcept
+	Water::Water(float const xpos, float const& zpos, unsigned int const width, unsigned int const height, float const& windowWidth, float const& windowHeight) noexcept
 	{
 		m_xpos = xpos;
 		m_zpos = zpos;
 		m_width = width;
 		m_height = height;
+		m_textureWidth = windowWidth;
+		m_textureHeight = windowHeight;
 
 		m_waveLevel = 0.03f;
 		m_waveSpeed = 0.05;
@@ -162,12 +164,12 @@ namespace Engine
 	void Water::InitFrameBuffers() noexcept
 	{
 		m_reflectionFrameBuffer = CreateFrameBuffer();
-		m_reflectionTexture = CreateTexture(REFLECTION_WIDTH, REFLECTION_HEIGHT);
-		m_reflectionDepthBuffer = CreateDepthTexture(REFLECTION_WIDTH, REFLECTION_HEIGHT);
+		m_reflectionTexture = CreateTexture(m_textureWidth, m_textureHeight);
+		m_reflectionDepthBuffer = CreateDepthTexture(m_textureWidth, m_textureHeight);
 		UnbindCurrentFrameBuffer();
 		m_refractionFrameBuffer = CreateFrameBuffer();
-		m_refractionTexture = CreateTexture(REFRACTION_WIDTH, REFRACTION_HEIGHT);
-		m_refractionDepthTexture = CreateDepthTexture(REFRACTION_WIDTH, REFRACTION_HEIGHT);
+		m_refractionTexture = CreateTexture(m_textureWidth, m_textureHeight);
+		m_refractionDepthTexture = CreateDepthTexture(m_textureWidth, m_textureHeight);
 		UnbindCurrentFrameBuffer();
 	}
 
@@ -265,12 +267,12 @@ namespace Engine
 
 	void Water::BindReflectionFrameBuffer() const noexcept
 	{
-		BindFrameBuffer(m_reflectionFrameBuffer, REFLECTION_WIDTH, REFLECTION_HEIGHT);
+		BindFrameBuffer(m_reflectionFrameBuffer, m_textureWidth, m_textureHeight);
 	}
 
 	void Water::BindRefractionFrameBuffer() const noexcept
 	{
-		BindFrameBuffer(m_refractionFrameBuffer, REFRACTION_WIDTH, REFRACTION_HEIGHT);
+		BindFrameBuffer(m_refractionFrameBuffer, m_textureWidth, m_textureHeight);
 	}
 
 	void Water::UnbindCurrentFrameBuffer() const noexcept

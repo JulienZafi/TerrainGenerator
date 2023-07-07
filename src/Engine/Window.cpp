@@ -24,10 +24,10 @@ namespace Engine
 	float Window::lastYpos = 0.0f;
 	Keyboard Window::keys = Keyboard();
 
-	Window::Window(unsigned int const width, unsigned int const height, std::string_view const& title) noexcept
+	Window::Window(unsigned int const defaultWidth, unsigned int const defaultHeight, std::string_view const& title) noexcept
 	{
-		this->width = width;
-		this->height = height;
+		this->width = defaultWidth;
+		this->height = defaultHeight;
 
 		Create(title);
 	}
@@ -48,6 +48,22 @@ namespace Engine
 #ifdef __APPLE__
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
+
+		/*
+		* Get principal monitor and set as window size if ok
+		*/
+		GLFWmonitor* monitor{ glfwGetPrimaryMonitor() };
+		const GLFWvidmode* mode{ glfwGetVideoMode(monitor) };
+
+		if (monitor)
+		{
+			const GLFWvidmode* mode{ glfwGetVideoMode(monitor) };
+			if (mode)
+			{
+				this->width = mode->width;
+				this->height = mode->height;
+			}
+		}
 
 		m_window = glfwCreateWindow((int)width, (int)height, title.data(), nullptr, nullptr);
 
