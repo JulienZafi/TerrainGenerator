@@ -27,7 +27,7 @@ namespace Application
 		Application() noexcept;
 		~Application() = default;
 
-		void Render(std::unique_ptr <Engine::Window>& window) noexcept;
+		void Render(std::unique_ptr <Engine::Window> const& window) noexcept;
 
 		void ShowGUI();
 
@@ -49,7 +49,6 @@ namespace Application
 		float m_zpos;
 
 		glm::vec3 m_lightColor;
-		glm::vec3 m_lightPosition;
 		glm::vec3 m_lightDirection;
 	};
 }
