@@ -28,7 +28,6 @@ namespace Engine
 		void InitFrameBuffers() noexcept;
 		unsigned int CreateFrameBuffer() noexcept;
 		unsigned int CreateTexture(unsigned int const width, unsigned int const height) noexcept;
-		unsigned int CreateDepthBuffer(unsigned int const width, unsigned int const height) noexcept;
 		unsigned int CreateDepthTexture(unsigned int const width, unsigned int const height) noexcept;
 
 		void UpdateMesh(glm::vec3 const &camPosition) noexcept;

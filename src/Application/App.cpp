@@ -75,7 +75,7 @@ namespace Application
 		m_terrain->Render(m_terrainShader, projection, reflectedView, model);
 
 		view = glm::mat4(glm::mat3(Engine::Camera::GetInstance()->ViewMatrix())); // remove translation from the view matrix
-		m_skybox->Render(m_skyboxShader, projection, view);
+		//m_skybox->Render(m_skyboxShader, projection, view);
 
 		m_water->UnbindCurrentFrameBuffer();
 		
@@ -96,7 +96,7 @@ namespace Application
 		m_terrain->Render(m_terrainShader, projection, reflectedView, model);
 
 		view = glm::mat4(glm::mat3(Engine::Camera::GetInstance()->ViewMatrix())); // remove translation from the view matrix
-		m_skybox->Render(m_skyboxShader, projection, view);
+		//m_skybox->Render(m_skyboxShader, projection, view);
 
 		m_water->UnbindCurrentFrameBuffer();
 
@@ -115,7 +115,7 @@ namespace Application
 		m_water->Render(m_waterShader, projection, reflectedView, model);
 
 		view = glm::mat4(glm::mat3(Engine::Camera::GetInstance()->ViewMatrix())); // remove translation from the view matrix
-		m_skybox->Render(m_skyboxShader, projection, view);
+		//m_skybox->Render(m_skyboxShader, projection, view);
 
 		/*
 		* Update Camera height
