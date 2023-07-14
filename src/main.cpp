@@ -4,7 +4,6 @@
 
 #include <imgui/imgui.h>
 
-
 /*
 * WINDOW DEFAULT PROPERTIES
 */
@@ -30,7 +29,6 @@ int main()
 		app->ShowGUI();
 
 		// --------------------
-
 		app->Render(window);
 
 		window->DrawGUI();

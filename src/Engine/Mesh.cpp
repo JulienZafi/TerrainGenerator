@@ -34,13 +34,23 @@ namespace Engine
 
 		// NORMALS
 		//////////
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 		glEnableVertexAttribArray(1);
 
 		// TEXTURE COORDS
 		/////////////////
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureCoords));
 		glEnableVertexAttribArray(2);
+
+		// TANGENT
+		//////////
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+		glEnableVertexAttribArray(3);
+
+		// BITANGENT
+		////////////
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
+		glEnableVertexAttribArray(4);
 
 		glBindVertexArray(0);
 	}

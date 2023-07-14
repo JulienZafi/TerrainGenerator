@@ -30,11 +30,15 @@ namespace Engine
 
 	enum class TextureType
 	{
-		GRASS = 0,
-		ROCK,
-		SAND,
-		SNOW,
-		WATER
+		ALBEDO_GRASS = 0,
+		ALBEDO_ROCK,
+		ALBEDO_SAND,
+		ROUGHNESS_GRASS,
+		ROUGHNESS_ROCK,
+		ROUGHNESS_SAND,
+		NORMAL_GRASS,
+		NORMAL_ROCK,
+		NORMAL_SAND,
 	};
 
 	class Terrain
@@ -71,6 +75,9 @@ namespace Engine
 		int m_numChunksToDisplay;
 		int m_chunkWidth;
 		int m_chunkHeight;
+		float m_ambientFactor;
+		float m_specularExponent;
+		float m_specularIntensity;
 
 		PerlinParams m_perlinParams;
 
