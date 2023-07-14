@@ -14,6 +14,7 @@ uniform sampler2D u_reflectionTexture;
 uniform sampler2D u_refractionTexture;
 uniform sampler2D u_dudvMap;
 uniform sampler2D u_normalMap;
+uniform sampler2D u_depthMap;
 
 uniform vec3 u_waterColor;
 uniform float u_waveLevel;
@@ -29,28 +30,38 @@ void main()
 	*/
     vec2 ndc = (v_clipspaceCoords.xy / v_clipspaceCoords.w) / 2.0 + 0.5;
 
-	vec2 reflectionTexCoords = vec2(ndc.x, ndc.y);
-	vec2 refractionTexCoords = vec2(ndc.x, -ndc.y);
-
+	vec2 reflectionTexCoords = vec2(ndc.x, -ndc.y);
+	vec2 refractionTexCoords = vec2(ndc.x, ndc.y);
+	
 	/*
 	* Add distortion to texture thanks to DUDV map, add motion with "u_moveFactor"
 	*/ 
 	vec2 distortion1 = (texture(u_dudvMap, vec2(v_textureCoords.x + u_moveFactor, v_textureCoords.y)).rg * 2.0 - 1.0) * u_waveLevel;
 	vec2 distortion2 = (texture(u_dudvMap, vec2(-v_textureCoords.x + u_moveFactor, v_textureCoords.y + u_moveFactor)).rg * 2.0 - 1.0) * u_waveLevel;
-	vec2 totalDistortion = (distortion1 + distortion2);
+	vec2 totalDistortion = distortion1 + distortion2;
+	//vec2 distortedTexCoords = texture(u_dudvMap, vec2(v_textureCoords.x + u_moveFactor, v_textureCoords.y)).rg * 0.1;
+	//distortedTexCoords = v_textureCoords + vec2(distortedTexCoords.x, distortedTexCoords.y + u_moveFactor);
+	//vec2 totalDistortion = (texture(u_dudvMap, distortedTexCoords).rg * 2.0 - 1.0) * u_waveLevel;
 	
 	reflectionTexCoords += totalDistortion;
-	reflectionTexCoords = clamp(reflectionTexCoords, 0.001, 0.999);
+	reflectionTexCoords.x = clamp(reflectionTexCoords.x, 0.001, 0.999);
+	reflectionTexCoords.y = clamp(reflectionTexCoords.y, -0.999, 0.001);
 	
 	refractionTexCoords += totalDistortion;
-	refractionTexCoords.x = clamp(refractionTexCoords.x, 0.001, 0.999);
-	refractionTexCoords.y = clamp(refractionTexCoords.y, -0.999, -0.001);
+	refractionTexCoords = clamp(refractionTexCoords, 0.001, 0.999);
 	
 	/*
 	* Get textures
 	*/
 	vec4 reflectionColor = texture(u_reflectionTexture, reflectionTexCoords);
 	vec4 refractionColor = texture(u_refractionTexture, refractionTexCoords);
+	
+	/*
+	* Fresnel effect
+	*/
+	vec3 viewVector = normalize(v_toCameraVector);
+	float refractiveFactor = dot(viewVector, vec3(0.0, 1.0, 0.0));
+	refractiveFactor = pow(refractiveFactor, u_refractiveFactor);
 	
 	/*
 	* Normal map
@@ -60,16 +71,9 @@ void main()
 	/*
 	* Final colour
 	*/
-	fragColor = mix(refractionColor, reflectionColor, u_refractiveFactor);
-	vec3 normal = vec3(normalMapColor.r * 2.0 - 1.0, normalMapColor.b * 3.0, normalMapColor.g * 2.0 - 1.0);
+	fragColor = mix(refractionColor, reflectionColor, refractiveFactor);
+	vec3 normal = vec3(normalMapColor.r * 2.0 - 1.0, normalMapColor.b, normalMapColor.g * 2.0 - 1.0);
 	normal = normalize(normal);
-	
-	/*
-	* Fresnel effect
-	*/
-	vec3 viewVector = normalize(v_toCameraVector);
-	float refractiveFactor = dot(viewVector, normal);
-	refractiveFactor = pow(refractiveFactor, u_refractiveFactor);
 	
 	vec3 reflectedLight = reflect(normalize(u_lightDirection), normal);
 	float specular = max(dot(reflectedLight, viewVector), 0.0);
@@ -80,4 +84,5 @@ void main()
 	* Add a color effet
 	*/
 	fragColor = mix(fragColor, vec4(u_waterColor, 1.0f), 0.2) + vec4(specularHighLights, 0.0);
+	
 }

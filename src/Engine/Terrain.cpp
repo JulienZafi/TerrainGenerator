@@ -29,15 +29,24 @@ namespace Engine
 		m_numChunksToDisplay = NUM_CHUNCKS_TO_DISPLAY;
 		m_chunkWidth = CHUNK_WIDTH;
 		m_chunkHeight = CHUNK_HEIGHT;
+		m_ambientFactor = 0.6f;
+		m_specularExponent = 32.0f;
+		m_specularIntensity = 0.3f;
 
 		float initialX = (float)m_chunkWidth * (float)m_numChunksToDisplay / 2.0f;
 		float initialZ = (float)m_chunkHeight * (float)m_numChunksToDisplay / 2.0f;
 
 		UpdatePlayerPosition(initialX, initialZ);
 
-		LoadTexture(TEXTURES_PATH + "grass.jpg", TextureType::GRASS);
-		LoadTexture(TEXTURES_PATH + "rock.jpg", TextureType::ROCK);
-		LoadTexture(TEXTURES_PATH + "sand.jpg", TextureType::SAND);
+		LoadTexture(TEXTURES_PATH + "grass_albedo.jpg", TextureType::ALBEDO_GRASS);
+		LoadTexture(TEXTURES_PATH + "rock_albedo.jpg", TextureType::ALBEDO_ROCK);
+		LoadTexture(TEXTURES_PATH + "rock2_albedo.jpg", TextureType::ALBEDO_SAND);
+		LoadTexture(TEXTURES_PATH + "grass_roughness.jpg", TextureType::ROUGHNESS_GRASS);
+		LoadTexture(TEXTURES_PATH + "rock_roughness.jpg", TextureType::ROUGHNESS_ROCK);
+		LoadTexture(TEXTURES_PATH + "rock2_roughness.jpg", TextureType::ROUGHNESS_SAND);
+		LoadTexture(TEXTURES_PATH + "grass_normal.jpg", TextureType::NORMAL_GRASS);
+		LoadTexture(TEXTURES_PATH + "rock_normal.jpg", TextureType::NORMAL_ROCK);
+		LoadTexture(TEXTURES_PATH + "rock2_normal.jpg", TextureType::NORMAL_SAND);
 	}
 
 	unsigned int Terrain::LoadTextureFromFile(std::string const& path) const noexcept
@@ -100,17 +109,32 @@ namespace Engine
 			
 			switch (type)
 			{
-			case TextureType::GRASS:
-				shader.SetUniform("u_textureGrass", textureUnit);
+			case TextureType::ALBEDO_GRASS:
+				shader.SetUniform("u_textureAlbedoGrass", textureUnit);
 				break;
-			case TextureType::ROCK:
-				shader.SetUniform("u_textureRock", textureUnit);
+			case TextureType::ALBEDO_ROCK:
+				shader.SetUniform("u_textureAlbedoRock", textureUnit);
 				break;
-			case TextureType::SAND:
-				shader.SetUniform("u_textureSand", textureUnit);
+			case TextureType::ALBEDO_SAND:
+				shader.SetUniform("u_textureAlbedoSand", textureUnit);
 				break;
-			case TextureType::WATER:
-				shader.SetUniform("u_textureWater", textureUnit);
+			case TextureType::ROUGHNESS_GRASS:
+				shader.SetUniform("u_textureRoughnessGrass", textureUnit);
+				break;
+			case TextureType::ROUGHNESS_ROCK:
+				shader.SetUniform("u_textureRoughnessRock", textureUnit);
+				break;
+			case TextureType::ROUGHNESS_SAND:
+				shader.SetUniform("u_textureRoughnessSand", textureUnit);
+				break;
+			case TextureType::NORMAL_GRASS:
+				shader.SetUniform("u_textureRoughnessGrass", textureUnit);
+				break;
+			case TextureType::NORMAL_ROCK:
+				shader.SetUniform("u_textureRoughnessRock", textureUnit);
+				break;
+			case TextureType::NORMAL_SAND:
+				shader.SetUniform("u_textureRoughnessSand", textureUnit);
 				break;
 			default:
 				break;
@@ -196,6 +220,32 @@ namespace Engine
 				vertices[bottomLeft].normal += faceNormal;
 				vertices[topRight].normal += faceNormal;
 
+				glm::vec2 deltaUV1 = vertices[bottomLeft].textureCoords - vertices[topLeft].textureCoords;
+				glm::vec2 deltaUV2 = vertices[topRight].textureCoords - vertices[topLeft].textureCoords;
+
+				float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+				glm::vec3 tangent{};
+				tangent.x = f * (deltaUV2.y * (v1.x - v0.x) - deltaUV1.y * (v2.x - v0.x));
+				tangent.y = f * (deltaUV2.y * (v1.y - v0.y) - deltaUV1.y * (v2.y - v0.y));
+				tangent.z = f * (deltaUV2.y * (v1.z - v0.z) - deltaUV1.y * (v2.z - v0.z));
+				tangent = glm::normalize(tangent);
+
+				glm::vec3 bitangent{};
+				bitangent.x = f * (-deltaUV2.x * (v1.x - v0.x) + deltaUV1.x * (v2.x - v0.x));
+				bitangent.y = f * (-deltaUV2.x * (v1.y - v0.y) + deltaUV1.x * (v2.y - v0.y));
+				bitangent.z = f * (-deltaUV2.x * (v1.z - v0.z) + deltaUV1.x * (v2.z - v0.z));
+				bitangent = glm::normalize(bitangent);
+
+				vertices[topLeft].tangent += tangent;
+				vertices[bottomLeft].tangent += tangent;
+				vertices[topRight].tangent += tangent;
+
+				vertices[topLeft].bitangent += bitangent;
+				vertices[bottomLeft].bitangent += bitangent;
+				vertices[topRight].bitangent += bitangent;
+
+				// Repeat for the second triangle of the square...
 				v0 = vertices[topRight].position;
 				v1 = vertices[bottomLeft].position;
 				v2 = vertices[bottomRight].position;
@@ -204,12 +254,37 @@ namespace Engine
 				vertices[topRight].normal += faceNormal;
 				vertices[bottomLeft].normal += faceNormal;
 				vertices[bottomRight].normal += faceNormal;
+
+				deltaUV1 = vertices[bottomLeft].textureCoords - vertices[topRight].textureCoords;
+				deltaUV2 = vertices[bottomRight].textureCoords - vertices[topRight].textureCoords;
+
+				f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+				tangent.x = f * (deltaUV2.y * (v1.x - v0.x) - deltaUV1.y * (v2.x - v0.x));
+				tangent.y = f * (deltaUV2.y * (v1.y - v0.y) - deltaUV1.y * (v2.y - v0.y));
+				tangent.z = f * (deltaUV2.y * (v1.z - v0.z) - deltaUV1.y * (v2.z - v0.z));
+				tangent = glm::normalize(tangent);
+
+				bitangent.x = f * (-deltaUV2.x * (v1.x - v0.x) + deltaUV1.x * (v2.x - v0.x));
+				bitangent.y = f * (-deltaUV2.x * (v1.y - v0.y) + deltaUV1.x * (v2.y - v0.y));
+				bitangent.z = f * (-deltaUV2.x * (v1.z - v0.z) + deltaUV1.x * (v2.z - v0.z));
+				bitangent = glm::normalize(bitangent);
+
+				vertices[topRight].tangent += tangent;
+				vertices[bottomLeft].tangent += tangent;
+				vertices[bottomRight].tangent += tangent;
+
+				vertices[topRight].bitangent += bitangent;
+				vertices[bottomLeft].bitangent += bitangent;
+				vertices[bottomRight].bitangent += bitangent;
 			}
 		}
 
 		for (auto& vertex : vertices)
 		{
 			vertex.normal = glm::normalize(vertex.normal);
+			vertex.tangent = glm::normalize(vertex.tangent);
+			vertex.bitangent = glm::normalize(vertex.bitangent);
 		}
 
 		return std::make_unique <Mesh>(vertices, indices);
@@ -296,13 +371,18 @@ namespace Engine
 	void Terrain::Render(Shader const& shader, glm::mat4 const& projection, glm::mat4 const& view, glm::mat4 const& model) const noexcept
 	{
 		shader.UseProgram();
+
 		BindTextures(shader);
 		shader.SetUniform("u_projection", projection);
 		shader.SetUniform("u_view", view);
 		shader.SetUniform("u_model", model);
 		shader.SetUniform("u_clipPlane", m_clipPlane);
-		shader.SetUniform("u_light.direction", m_lightDirection);
-		shader.SetUniform("u_light.color", m_lightColor);
+		shader.SetUniform("u_lightDirection", m_lightDirection);
+		shader.SetUniform("u_lightColor", m_lightColor);
+		shader.SetUniform("u_ambientFactor", m_ambientFactor);
+		shader.SetUniform("u_specularExponent", m_specularExponent);
+		shader.SetUniform("u_specularIntensity", m_specularIntensity);
+		shader.SetUniform("u_cameraPosition", Camera::GetInstance()->Position());
 
 		for (const auto& [coord, mesh] : m_meshes)
 		{	
@@ -331,6 +411,9 @@ namespace Engine
 		ImGui::DragInt("Num chunks to display", &m_numChunksToDisplay, 1, 1, 10);
 		ImGui::DragInt("Chunk width", &m_chunkWidth, 1, 10, 256);
 		ImGui::DragInt("Chunk height", &m_chunkHeight, 1, 10, 256);
+		ImGui::DragFloat("Ambient factor", &m_ambientFactor, 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat("Specular exponent", &m_specularExponent, 0.1f, 0.0f, 256.0f);
+		ImGui::DragFloat("Specular intensity", &m_specularIntensity, 0.01f, 0.0f, 1.0f);
 		ImGui::End();
 
 		ImGui::Begin("Perlin Noise settings : ");

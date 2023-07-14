@@ -49,6 +49,7 @@ namespace Application
 		*/
 		m_xpos = Engine::Camera::GetInstance()->Position().x;
 		m_zpos = Engine::Camera::GetInstance()->Position().z;
+
 		m_terrain->UpdatePlayerPosition(m_xpos, m_zpos);
 		m_water->UpdateMesh(Engine::Camera::GetInstance()->Position());
 
