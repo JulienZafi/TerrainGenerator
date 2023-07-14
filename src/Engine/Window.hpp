@@ -33,7 +33,7 @@ namespace Engine
 		Window(Window const&) = delete;
 		~Window() = default;
 
-		Window(unsigned int const defaultWidth = 800, unsigned int const defaultHeight = 600, std::string_view const& title = "Window") noexcept;
+		Window(unsigned int const width = 800, unsigned int const height = 600, std::string_view const& title = "Window") noexcept;
 
 		void MakeCurrent() const noexcept;
 

@@ -8,19 +8,19 @@
 /*
 * WINDOW DEFAULT PROPERTIES
 */
-#define DEFAULT_WIDTH	1920
-#define DEFAULT_HEIGHT	1280
+#define WIDTH	1920
+#define HEIGHT	1280
 #define TITLE	"3D Terrain Generator"
 
 int main()
 {
-	std::unique_ptr<Engine::Window> window{ std::make_unique<Engine::Window>(DEFAULT_WIDTH, DEFAULT_HEIGHT, TITLE) };
+	std::unique_ptr<Engine::Window> window{ std::make_unique<Engine::Window>(WIDTH, HEIGHT, TITLE) };
 	window->InitGUI();
 
 	/*
 	* RENDER LOOP
 	*/
-	std::unique_ptr <Application::Application> app{ std::make_unique<Application::Application>(window->Width(), window->Height()) };
+	std::unique_ptr <Application::Application> app{ std::make_unique<Application::Application>() };
 	while (!window->ShouldClose())
 	{
 		window->UpdateTime();

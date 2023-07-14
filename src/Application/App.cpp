@@ -11,7 +11,7 @@
 
 namespace Application
 {
-	Application::Application(float const& windowWidth, float const& windowHeight) noexcept
+	Application::Application() noexcept
 	{
 		m_terrainShader = Engine::Shader(TERRAIN_VSHADER_PATH, TERRAIN_FSHADER_PATH);
 		m_terrain = std::make_unique <Engine::Terrain>();
@@ -30,7 +30,7 @@ namespace Application
 		m_lightColor = {0.7f, 0.7f, 0.7f};
 		m_lightDirection = { -0.2f, -1.0f, -0.3f };
 
-		m_water = std::make_unique <Engine::Water>(m_xpos, m_zpos, 2 * m_terrain->Width() + 50, 2 * m_terrain->Height() + 50, windowWidth, windowHeight);
+		m_water = std::make_unique <Engine::Water>(m_xpos, m_zpos, 2 * m_terrain->Width() + 50, 2 * m_terrain->Height() + 50);
 		m_waterShader = Engine::Shader(WATER_VSHADER_PATH, WATER_FSHADER_PATH);
 
 		m_skyboxShader = Engine::Shader(SKYBOX_VSHADER_PATH, SKYBOX_FSHADER_PATH);

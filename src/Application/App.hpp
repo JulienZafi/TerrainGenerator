@@ -24,8 +24,7 @@ namespace Application
 	class Application
 	{
 	public:
-		Application() = delete;
-		Application(float const &windowWidth, float const &windowHeight) noexcept;
+		Application() noexcept;
 		~Application() = default;
 
 		void Render(std::unique_ptr <Engine::Window> const& window);

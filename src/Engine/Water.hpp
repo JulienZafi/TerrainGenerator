@@ -7,6 +7,12 @@
 constexpr std::string_view const DUDV_FILE{ "textures//water_dudv.png" };
 constexpr std::string_view const NORMAL_FILE{ "textures//water_normalmap.png" };
 
+#define REFLECTION_WIDTH 1920
+#define REFLECTION_HEIGHT 1080
+
+#define REFRACTION_WIDTH 1920
+#define REFRACTION_HEIGHT 1080
+
 #define OFFSET_POS 25
 
 namespace Engine
@@ -17,7 +23,7 @@ namespace Engine
 		Water() = delete;
 		~Water() = default;
 
-		Water(float const xPos, float const& zpos, unsigned int const width, unsigned int const height, float const& windowWidth, float const& windowHeight) noexcept;
+		Water(float const xPos, float const& zpos, unsigned int const width, unsigned int const height) noexcept;
 
 		void InitFrameBuffers() noexcept;
 		unsigned int CreateFrameBuffer() noexcept;
@@ -50,9 +56,6 @@ namespace Engine
 
 		unsigned int m_width;
 		unsigned int m_height;
-
-		float m_textureWidth;
-		float m_textureHeight;
 
 		unsigned int m_reflectionFrameBuffer;
 		unsigned int m_reflectionTexture;
